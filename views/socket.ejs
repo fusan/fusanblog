@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+  	<h1><%= title %></h1>
+  	<span><%= title %>のrouterで使う</span>
+
+    <input type="text" name="formTest" value="" placeholder="リアルタイムで反映" id="formTest">
+
+    <!-- 位置情報ログ　-->
+    <div id="socketTestField">
+      <span id="dot">１</span>
+      <div id="socketTestFieldInner"></div>
+    </div>
+
+    <!-- chat line -->
+    <section id="chat">
+
+     <div id="chatTimeLine">
+
+       <div id="submit">
+        <input type="text" name="userID" value="" placeholder="Chat ID" id="userID">
+        <input type="text" name="message" value="" placeholder="コメント" id="message">
+        <button id="sendMessage">送信</button>
+      </div>
+
+      <div id="stage"></div>
+     </div>
+
+    </section>
+
+  	<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="/javascripts/socketioStudy.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  </body>
+  </html>

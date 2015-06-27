@@ -1,0 +1,93 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+h4 {
+	margin:1% 0;
+	padding: 0;
+}
+a {
+  color: #00B7FF;
+}
+
+#viewArea {
+	margin: 0;
+	padding: 1% 0 0 1%;
+	height: 99%;
+	width: 99%;
+}
+
+#viewHeader {
+	height: auto;
+	width: auto;
+}
+
+#dot {
+	width: 4px;
+	height: 4px;
+	background: gray;
+
+}
+
+#socketTestField {
+	width: 90%;
+	height: 300px;
+	overflow: scroll;
+	box-shadow: 0 0 1px gray;
+}
+#socketTestFieldInner {
+	width: auto;
+	height: 600px;
+}
+#chat {
+	width: 100%;
+}
+
+#chatTimeLine {
+	float: left;
+	margin: 2% 0 0 0;
+	width: 90%;
+}
+
+#stage {
+	float: left;
+	width: 100%;
+	height: auto;
+}
+
+#stage > div > span {
+	margin: 5px 10px 0 5px;
+}
+
+#stage > div {
+	height: auto;
+	width: 100%;
+	box-shadow: 0 0 1px gray;
+}
+
+#submit {
+	width: 100%;
+}
+
+/* chat */
+.photo {
+	display: inline-block;
+	height: 36px;
+	width: 36px;
+	line-height: 36px;
+	box-shadow: 0 0 1px gray;
+	background: rgba(0,0,0,.32);
+	border-radius: 36px;
+}
+
+.time {
+	height: 100%;
+}
+
+.users {
+	height: 100%;
+}
+
+.comment {
+	height: auto;
+}
