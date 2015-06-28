@@ -54,7 +54,7 @@ function scraping() {
 
 function upsert() {
 	$(function() {
-    	$('#insert').on('click', function() {
+    	id('insert').addEventListener('click', function() {
     		var $settlement = $('#settlement');
     		var $company = $('#company');
 
@@ -86,7 +86,7 @@ function upsert() {
     		} else {
     			$('#testFileld').html('決算期と会社名を必ず入力してください');
     		}
-    	});
+    	},false);
     });
 }
 
@@ -113,6 +113,52 @@ function socketIo() {
 
 	  id('socketTestFieldInner').innerHTML = 'pageX :' + data.positionX + 'pageY: ' + data.positionY;
 	});
+
+	/* form realtime exist  */
+	id('formTest').addEventListener('keyup', function(){
+
+	  var text = id('formTest').value;
+	  socket.emit('text send', {textData: text});
+
+	},false);
+
+	socket.on('text return', function(data) {
+	  field.innerHTML = data.textData;
+	});
+
+	/* chat system */
+	id('sendMessage').addEventListener('click', function() {
+	  var userID = id('userID').value !='' ? id('userID').value : '未記入';
+	  var message = id('message').value !='' ? id('message').value : '未記入';
+	  var pushTime = new Date();
+
+	  //socketでクライアントへ送信
+	  socket.emit('message send', {pushTime: pushTime, userID: userID, message: message});
+
+	},false);
+
+	//チャット履歴の読み込み
+	socket.emit('chat initial send', {load: 'start'});
+
+	socket.on('message return', function(data) {
+	    console.log(data);
+
+	    var pushTime = new Date(data.pushTime);
+	    var time = pushTime.getHours() + '.' + pushTime.getMinutes() + '.' + pushTime.getSeconds();
+
+	    id('stage').innerHTML += '<div><span class="photo"></span><span class="time">'+ time +'</span><span class="users">' + data.userID + '</span><span class="comment">' + data.message + '</span></div>';
+	  });
+
+	//チャット履歴の読み込み
+	socket.on('chat initial return', function(data) {
+	  console.log(data);
+
+	  for(var i=0,n=data.length;i<n;i++) {
+	    var time = new Date(data[i].pushTime).getHours() + '.' + new Date(data[i].pushTime).getMinutes() + '.' + new Date(data[i].pushTime).getSeconds();
+	    id('stage').innerHTML += '<div><span class="photo"></span><span class="time">'+ time +'</span><span class="users">' + data[i].userID + '</span><span class="comment">' + data[i].message + '</span></div>';
+	  }
+	  
+	});
 }
 
 var count = 0;
@@ -137,8 +183,6 @@ function successFunc(position) {
 function errFunc(error) {
   console.log(error);
 }
-
-
 
 /*
 //数値配列のループ処理　ES6

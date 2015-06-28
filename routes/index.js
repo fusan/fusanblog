@@ -5,10 +5,10 @@ var model = require('../model.js');
 	User = model.User;
 
 var noodle = require('noodlejs');
-console.log(noodle.query);
+//console.log(noodle.query);
 
 var validator = require('validator');
-console.log(validator);
+//console.log(validator);
 
 // Root
 router.get('/', function(req, res, next) {

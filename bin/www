@@ -4,6 +4,8 @@
  * Module dependencies.
  */
 
+//heroku https://fusanblog.herokuapp.com/ | https://git.heroku.com/fusanblog.git
+
 var app = require('../app');
 var debug = require('debug')('blog:server');
 var http = require('http');
@@ -50,16 +52,6 @@ io.on('connection', function (socket) {
       socket.broadcast.emit('client push', data);
   });
 
-
-});
-
-io2.on('connection', function(socket) {
-  console.log('namespace ok');
-
-  Chat.find({}, function(err, data) {
-    socket.emit('chat initial', data);
-  });
-
   //リアルタイムテキスト
   socket.on('text send', function(data) {
     console.log(data);
@@ -68,6 +60,15 @@ io2.on('connection', function(socket) {
     socket.broadcast.emit('text return', data);
   });
 
+  //チャット履歴の読み込み
+  socket.on('chat initial send' ,function(data) {
+    if(data.load == 'start') {
+      Chat.find({}, function(err, data) {
+        socket.emit('chat initial return', data);
+     });
+    }
+  });
+  
   //chat message
   socket.on('message send', function(data) {
     //console.log(data);
@@ -87,6 +88,11 @@ io2.on('connection', function(socket) {
     socket.emit('message return', data);
     socket.broadcast.emit('message return', data);
   });
+
+});
+
+io2.on('connection', function(socket) {
+  console.log('namespace ok');
 });
 
 
