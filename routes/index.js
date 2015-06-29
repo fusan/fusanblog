@@ -12,11 +12,13 @@ var validator = require('validator');
 
 // Root
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'MongoDBなれよう' });
+  res.render('index', { title: 'Test App' });
 });
 
 router.get('/stream', function(req, res) {
-	var header = '<h4>'+ req.url +'</h4>';
+	console.log(req.url.split('/')[1]);
+
+	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
 	var html = '';
 
 	res.send({html: html, header: header});
@@ -25,7 +27,7 @@ router.get('/stream', function(req, res) {
 router.get('/upsert', function(req,res) {
 	console.log(req.url);
 
-	var header = '<h4>'+ req.url +'</h4>';
+	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
 
 	var html = '<div>データベースに決算期と会社名があれば、更新なければデータ挿入する。<br>';
 		html += 'Yahooscrapingでは証券コード、決算期をチェックして更新があればインサートする感じで使えそう。<br>';
@@ -44,9 +46,9 @@ router.get('/upsert', function(req,res) {
 //noodlejsモジュールのテスト
 router.get('/scraping', function(req, res) {
 
-	var header = '<h4>'+ req.url +'</h4>';
-		header += 'URLを入力するとスクレイピング開始。module : noodle<br>';
-		header += '<div style="background: rgba(0,0,0,.08);">URL: <input type="text" name="scrape" id="scrapeURL"><button id="scrape">scrape</button></div>';
+	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
+		header += '<div style="margin:.4rem .2rem;">URLを入力するとスクレイピング開始。module : noodle</div>';
+		header += '<div style="background: rgba(0,0,0,.08);margin:.4rem .2rem;">URL: <input type="text" name="scrape" id="scrapeURL"><button id="scrape">scrape</button></div>';
 	var html = '';
 	
 	res.send({html: html, header: header});
@@ -63,7 +65,7 @@ router.get('/scrape', function(req, res) {
 
 	noodle.query(query).then(function(results) {
 		var html = results.results[0].results[0];
-		var header = '<h4>'+ req.query.url +'</h4>';
+		var header = '<h4 id="viewHeaderTitle">'+ req.query.url +'</h4>';
 			header += 'URL: <input type="text" name="scrape" id="scrapeURL"><button id="scrape">scrape</button>';
 
 		res.send({html: html, header: header});
@@ -73,15 +75,15 @@ router.get('/scrape', function(req, res) {
 
 router.get('/socket', function(req,res) {
 	//console.log(req.query)
-	var header = '<h4>'+ req.url +'</h4>';
+	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
 
 	var html = '<button id="button">GPS</button><input type="text" name="formTest" value="" placeholder="リアルタイムで反映" id="formTest">';
-		html += '<!-- 位置情報ログ　--><div id="socketTestField"><span id="dot">１</span><div id="socketTestFieldInner"></div></div>';
+		html += '<!-- 位置情報ログ　--><div id="socketTestField"><div id="socketTestFieldInner"><span id="dot"></span></div></div>';
 	    html += '<!-- chat line --><section id="chat"><div id="chatTimeLine">';
 	    html += '<div id="submit"><input type="text" name="userID" value="" placeholder="Chat ID" id="userID">';
 	    html += '<input type="text" name="message" value="" placeholder="コメント" id="message">';
-	    html += '<button id="sendMessage">送信</button>';
-	    html += '</div><div id="stage"></div></div></section>';
+	    html += '<button id="sendMessage">送信</button></div>';
+	    html += '<div id="stage"></div></div></section>';
 
 	    res.send({html: html, header: header});
 

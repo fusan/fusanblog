@@ -2,6 +2,11 @@ function id (selector) {
 	return document.getElementById(selector);
 }
 
+/*
+フロントエンドのコントロールはすべてまかなえる。
+ajax, view DOM, contoroller function 
+*/
+
 //ボタンと非同期通信お紐付け
 var buttons = document.getElementsByTagName('button');
 
@@ -10,6 +15,7 @@ for(var i=0,n=buttons.length;i<n;i++) {
 	change(buttons[i].getAttribute('id'));
 }
 
+/* id をリンクアドレスにして非同期アクセス　*/
 function change(selector) {
 	id(selector).addEventListener('click', function() {
 		//console.log('/' + selector);
@@ -19,9 +25,14 @@ function change(selector) {
 	});
 
 	view.done(function(data) {
+
+		//view 変動するviewを増やしたかったらselectorを増やす。
 		id('viewHeader').innerHTML = data.header;
 		id('viewArea').innerHTML = data.html;
 
+		//コントローラー
+		//本来はモジュールで外に出した方がわかりやすい。es6以降に成る。
+		//コントローラーを増やすことで機能を使いできる。
 		if(selector == 'scraping') { scraping(); }
 		if(selector == 'upsert') { upsert(); }
 		if(selector == 'socket') { socketIo(); }
@@ -98,20 +109,30 @@ function socketIo() {
 
 	socket.on('client push', function(data) {
 		console.log(data[0]);
+		id('socketTestField').style.boxShadow = '0 0 2px green';
 	    field.innerHTML  = '緯度：' + data[0].latitude + '<br>' + field.innerHTML;
 	  });
 
 	/* mousemove event */
 	id('socketTestField').addEventListener('mousemove', function(e) {
-	  console.log(e.pageX, e.pageY);
-	  socket.emit('mousemove', {positionX : e.pageX, positionY: e.pageY});
+	  //console.log(e.pageX, e.pageY);
+	  socket.emit('mousemove', {positionX : e.pageX - $('#socketTestFieldInner').offset().left, positionY: e.pageY - $('#socketTestFieldInner').offset().top});
 	},false);
 
 	socket.on('mousemove return', function(data) {
-	  id('dot').style.top = data.positionY;
-	  id('dot').style.left = data.positionX;
+		//id('dot').style.position = 'relative';
+	  	//id('dot').style.top = data.positionY;
+	  	//id('dot').style.left = data.positionX;
 
-	  id('socketTestFieldInner').innerHTML = 'pageX :' + data.positionX + 'pageY: ' + data.positionY;
+	  $(function() {
+		$('#dot').css({
+		  	position: 'relative',
+		  	top: data.positionY,
+		  	left: data.positionX
+		  });
+		});
+
+	  //id('socketTestFieldInner').innerHTML = 'pageX :' + data.positionX + 'pageY: ' + data.positionY;
 	});
 
 	/* form realtime exist  */
@@ -123,7 +144,8 @@ function socketIo() {
 	},false);
 
 	socket.on('text return', function(data) {
-	  field.innerHTML = data.textData;
+		id('socketTestField').style.boxShadow = '0 0 1px red';
+	  	field.innerHTML = data.textData;
 	});
 
 	/* chat system */
@@ -146,7 +168,7 @@ function socketIo() {
 	    var pushTime = new Date(data.pushTime);
 	    var time = pushTime.getHours() + '.' + pushTime.getMinutes() + '.' + pushTime.getSeconds();
 
-	    id('stage').innerHTML += '<div><span class="photo"></span><span class="time">'+ time +'</span><span class="users">' + data.userID + '</span><span class="comment">' + data.message + '</span></div>';
+	    id('stage').innerHTML += '<div><span class="photo"></span><span class="users">' + data.userID + '</span><span class="time">'+ time +'</span><span class="comment">' + data.message + '</span></div>';
 	  });
 
 	//チャット履歴の読み込み
@@ -155,7 +177,7 @@ function socketIo() {
 
 	  for(var i=0,n=data.length;i<n;i++) {
 	    var time = new Date(data[i].pushTime).getHours() + '.' + new Date(data[i].pushTime).getMinutes() + '.' + new Date(data[i].pushTime).getSeconds();
-	    id('stage').innerHTML += '<div><span class="photo"></span><span class="time">'+ time +'</span><span class="users">' + data[i].userID + '</span><span class="comment">' + data[i].message + '</span></div>';
+	    id('stage').innerHTML += '<div><span class="photo"></span><span class="users">' + data[i].userID + '</span><span class="time">'+ time +'</span><span class="comment">' + data[i].message + '</span></div>';
 	  }
 	  
 	});

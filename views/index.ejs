@@ -5,11 +5,12 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
+    <h1><%= title %></h1>
     <header id="header">
-       <button id="upsert">upsert!</button>
+       <button id="upsert">Upsert!</button>
        <button id="scraping">Scraping!</button>
-       <button id="stream">stream!</button>
-       <button id="socket">socket!</button>
+       <button id="stream">Stream!</button>
+       <button id="socket">Socket!</button>
     </header><!-- /header -->
     
      <!-- mongoose upsert test -->
@@ -20,5 +21,8 @@
     <script src="./javascripts/index.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="./javascripts/socketTest.js"></script>
+    <script type="text/javascript">
+    console.log(document.getElementById('viewArea').style);
+    </script>
   </body>
 </html>

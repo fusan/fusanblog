@@ -91,10 +91,10 @@ io.on('connection', function (socket) {
 
 });
 
+//name space
 io2.on('connection', function(socket) {
   console.log('namespace ok');
 });
-
 
 /**
  * Listen on provided port, on all network interfaces.
