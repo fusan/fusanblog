@@ -174,6 +174,7 @@ function socketIo() {
 	//チャット履歴の読み込み
 	socket.on('chat initial return', function(data) {
 	  console.log(data);
+	  id('stage').innerHTML = '';
 
 	  for(var i=0,n=data.length;i<n;i++) {
 	    var time = new Date(data[i].pushTime).getHours() + '.' + new Date(data[i].pushTime).getMinutes() + '.' + new Date(data[i].pushTime).getSeconds();

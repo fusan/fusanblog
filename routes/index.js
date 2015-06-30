@@ -29,7 +29,7 @@ router.get('/upsert', function(req,res) {
 
 	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
 
-	var html = '<div>データベースに決算期と会社名があれば、更新なければデータ挿入する。<br>';
+	var html = '<div>データベースに決算期と会社名があれば更新、なければデータ挿入する。<br>';
 		html += 'Yahooscrapingでは証券コード、決算期をチェックして更新があればインサートする感じで使えそう。<br>';
 		html += 'ただし、社名変更、M＆Aがあると新規でスクレイピングされることになる。';
 		html += '<ul>使ったquery<li>upsert</li><li>$and</li><li>$set</li></ul></div>';
@@ -48,7 +48,7 @@ router.get('/scraping', function(req, res) {
 
 	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
 		header += '<div style="margin:.4rem .2rem;">URLを入力するとスクレイピング開始。module : noodle</div>';
-		header += '<div style="background: rgba(0,0,0,.08);margin:.4rem .2rem;">URL: <input type="text" name="scrape" id="scrapeURL"><button id="scrape">scrape</button></div>';
+		header += '<div style="background: rgba(0,0,0,.08);margin:.4rem .2rem;">URL : http://www. <input type="text" name="scrape" id="scrapeURL"> .com/ <button id="scrape">scrape</button></div>';
 	var html = '';
 	
 	res.send({html: html, header: header});
@@ -57,7 +57,7 @@ router.get('/scraping', function(req, res) {
 router.get('/scrape', function(req, res) {
 	console.log(req.query);
 	var query = {
-		'url': req.query.url,
+		'url': 'http://www.' + req.query.url + '.com',
 		'type': 'html',
 		'selector': 'body',
 		'extract': 'html'
