@@ -30,7 +30,11 @@ var server = http.createServer(app);
 var io = require('socket.io').listen(server);
 var io2 = io.of('/users');
 
+var validator = require('validator');
+
+
 io.on('connection', function (socket) {
+  console.log(validator.isEmail('gogyaru@gmail.com'));
 
   console.log('a user connected');
 
@@ -72,15 +76,18 @@ io.on('connection', function (socket) {
   //chat message
   socket.on('message send', function(data) {
     //console.log(data);
+
     var log = {};
       log.pushTime = data.pushTime;
       log.userID = data.userID;
-      log.message = data.message;
+      log.message = validator.escape(data.message);
+
+      console.log(log.message);
 
     var chat = new Chat(log);
       chat.save(function(err) {
         if(err) throw err;
-        Chat.find({'userID': 'fusan'}, function(err, data) {
+        Chat.find({}, function(err, data) {
           console.log(data);
         });
       });

@@ -8,7 +8,7 @@ var noodle = require('noodlejs');
 //console.log(noodle.query);
 
 var validator = require('validator');
-//console.log(validator);
+console.log(validator.escape('<script>alert("yes")</script>'));
 
 // Root
 router.get('/', function(req, res, next) {
@@ -66,7 +66,7 @@ router.get('/scrape', function(req, res) {
 	noodle.query(query).then(function(results) {
 		var html = results.results[0].results[0];
 		var header = '<h4 id="viewHeaderTitle">'+ req.query.url +'</h4>';
-			header += 'URL: <input type="text" name="scrape" id="scrapeURL"><button id="scrape">scrape</button>';
+			header += '<div style="background: rgba(0,0,0,.08);margin:.4rem .2rem;">URL : http://www. <input type="text" name="scrape" id="scrapeURL"> .com/ <button id="scrape">scrape</button></div>';
 
 		res.send({html: html, header: header});
 	});

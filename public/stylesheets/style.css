@@ -47,6 +47,7 @@ header button {
 }
 
 #viewHeaderTitle:first-letter {
+	margin: 0 .08rem 0 0;
 	color: red;
 	font-size: 1.2rem;
 }
