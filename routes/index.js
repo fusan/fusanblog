@@ -7,9 +7,6 @@ var model = require('../model.js');
 var noodle = require('noodlejs');
 //console.log(noodle.query);
 
-var validator = require('validator');
-console.log(validator.escape('<script>alert("yes")</script>'));
-
 // Root
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Test App' });
@@ -77,11 +74,12 @@ router.get('/socket', function(req,res) {
 	//console.log(req.query)
 	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
 
-	var html = '<button id="button">GPS</button><input type="text" name="formTest" value="" placeholder="リアルタイムで反映" id="formTest">';
+	var html = '<button id="button">GPSデータ取得</button><input type="text" name="formTest" value="" placeholder="リアルタイムで反映" id="formTest">';
 		html += '<!-- 位置情報ログ　--><div id="socketTestField"><div id="socketTestFieldInner"><span id="dot"></span></div></div>';
 	    html += '<!-- chat line --><section id="chat"><div id="chatTimeLine">';
 	    html += '<div id="submit"><input type="text" name="userID" value="" placeholder="Chat ID" id="userID">';
 	    html += '<input type="text" name="message" value="" placeholder="コメント" id="message">';
+	    html += '<input type="file" accept="image/*" name="photo" id="photo" multiple>';
 	    html += '<button id="sendMessage">送信</button></div>';
 	    html += '<div id="stage"></div></div></section>';
 

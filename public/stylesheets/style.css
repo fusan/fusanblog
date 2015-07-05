@@ -66,9 +66,10 @@ header button {
 	overflow: scroll;
 	box-shadow: 0 0 1px gray;
 }
+
 #socketTestFieldInner {
-	width: auto;
-	height: 600px;
+	width: 300px;
+	height: auto;
 }
 #chat {
 	width: 100%;
