@@ -98,7 +98,7 @@ header button {
 }
 
 /* chat */
-.photo {
+.profile {
 	display: inline-block;
 	height: 36px;
 	width: 36px;
@@ -118,4 +118,9 @@ header button {
 
 .comment {
 	height: auto;
+}
+
+.chatRemove {
+	color: red;
+	font-weight: bold;
 }

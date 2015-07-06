@@ -88,11 +88,23 @@ io.on('connection', function (socket) {
         if(err) throw err;
         Chat.find({}, function(err, data) {
           console.log(data);
+          socket.emit('message return', data);
+          socket.broadcast.emit('message return', data);
         });
       });
+  });
 
-    socket.emit('message return', data);
-    socket.broadcast.emit('message return', data);
+  //chat remove
+  socket.on('chat remove', function(data) {
+    //console.log(data);
+    Chat.remove({_id: data.id}, function(err) {
+      if(err) throw err;
+      console.log('remove collection',data);
+      Chat.find({}, function(err, data) {
+        socket.emit('chat remove return',data);
+        socket.broadcast.emit('chat remove return',data);
+      });
+    });
   });
 
 });

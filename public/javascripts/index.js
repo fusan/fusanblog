@@ -2,7 +2,7 @@ function id (selector) {
 	return document.getElementById(selector);
 }
 
-var socket = io.connect('https://fusanblog.herokuapp.com'); // || 'http://localhost:4000'
+var socket = io.connect('http://localhost:4000' || 'https://fusanblog.herokuapp.com'); // || 
     //クライアントからsocketオブジェクトをサーバーにemit　これが最初の挙動
     
     socket.on('news', function (data) {
@@ -129,14 +129,12 @@ function socketIo() {
 	/* mousemove event */
 	field.addEventListener('mousemove', function(e) {
 	  //console.log(e.pageX, e.pageY);
-	  socket.emit('mousemove', {positionX : e.pageX - id('socketTestField').offsetLeft, positionY: e.pageY - id('socketTestField').offsetTop});
+	  socket.emit('mousemove', {
+	  	positionX : e.pageX - id('socketTestField').offsetLeft,
+	  	positionY: e.pageY - id('socketTestField').offsetTop});
 	},false);
 
 	socket.on('mousemove return', function(data) {
-		//id('dot').style.position = 'relative';
-	  	//id('dot').style.top = data.positionY;
-	  	//id('dot').style.left = data.positionX;
-
 	  $(function() {
 		$('#dot').css({
 		  	position: 'relative',
@@ -144,8 +142,6 @@ function socketIo() {
 		  	left: data.positionX
 		  });
 		});
-
-	  //id('socketTestFieldInner').innerHTML = 'pageX :' + data.positionX + 'pageY: ' + data.positionY;
 	});
 
 	/* form realtime exist  */
@@ -179,25 +175,20 @@ function socketIo() {
 	//チャット履歴の読み込み
 	socket.emit('chat initial send', {load: 'start'});
 
-	socket.on('message return', function(data) {
-	    console.log(data);
+	//チャット投稿
+	socket.on('message return', function(data) {　
+		//console.log(data);
+		chatline(data);  });
 
-	    var pushTime = new Date(data.pushTime);
-	    var time = pushTime.getHours() + '.' + pushTime.getMinutes() + '.' + pushTime.getSeconds();
-
-	    id('stage').innerHTML += '<div><span class="photo"></span><span class="users">' + data.userID + '</span><span class="time">'+ time +'</span><span class="comment">' + data.message + '</span><span><img src="'+ data.photo +'"></span></div>';
-	  });
-
-	//チャット履歴の読み込み
-	socket.on('chat initial return', function(data) {
-	  console.log(data.length == 0 ? 'no chat data!' : data);
-	  id('stage').innerHTML = '';
-
-	  for(var i=0,n=data.length;i<n;i++) {
-	    var time = new Date(data[i].pushTime).getHours() + '.' + new Date(data[i].pushTime).getMinutes() + '.' + new Date(data[i].pushTime).getSeconds();
-	    id('stage').innerHTML += '<div><span class="photo"></span><span class="users">' + data[i].userID + '</span><span class="time">'+ time +'</span><span class="comment">' + data[i].message + '</span><span><img src="'+ data[i].photo +'"></span></div>';
-	  }
-	  
+	//チャット履歴読み込み
+	socket.on('chat initial return', function(data) { 
+		//console.log(data);
+		chatline(data); });
+	
+	//チャット削除後
+	socket.on('chat remove return', function(data) { 
+		//console.log(data); 
+		chatline(data);
 	});
 
 	//画像投稿
@@ -230,6 +221,7 @@ function socketIo() {
 		console.log('圧縮画像データ', photoFile);
 	}
 	*/
+	  
 }
 
 //画像圧縮
@@ -274,11 +266,64 @@ function imageMin(photo) {
 		}
 
 		//canvasを画像データに変換
-		var minPhoto = canvas.toDataURL('image/jpeg');
+		var minPhoto = canvas.toDataURL();
 
 		//socketに渡す。
 		return minPhoto;
 		//console.log(photoFile);
+}
+
+function chatline(data) {
+	console.log(data.length == 0 ? 'no chat data!' : data);
+
+	id('stage').innerHTML = '';
+
+		for(var i=0,n=data.length ;i<n;i++) {
+		  	(function () {
+		  		console.log('socketから受け取るID:', this._id);
+
+		  	  	var date = new Date(this.pushTime);
+		  	  	var time = date.getHours() + '.' + date.getMinutes() + '.' + date.getSeconds();
+
+		  	  	var html = '<div><span class="profile"></span><span class="users">' + this.userID + '</span>';
+		  	  		html += '<span class="time">'+ time +'</span><span class="comment">' + this.message + '</span>';
+		  	  		html += '<span><img src="'+ this.photo +'"></span>';
+		  	  		html += '<span id="' + i + '/' + this._id +'" class="chatRemove" onclick="chatRemove('+ i +');">Re</span></div>';
+
+		    	id('stage').innerHTML += html;
+
+		    	console.log('dom生成後にチェック：', document.getElementById(i+ '/' +this._id));
+
+		  	  	//id(this._id).addEventListener('click', chatRemove, false);
+		  	}).call(data[i],i);
+		}
+}
+
+//chat 削除
+function chatRemove(num) {
+	//console.log('チャットナンバリング:',num);
+
+	var chats = document.getElementsByClassName('chatRemove');
+
+	for(var i=0,n=chats.length;i<n;i++) {
+		//console.log('チャットID:', chats[i].getAttribute('id'));
+		if(num == i) {
+			var chatRemoveId = chats[i].getAttribute('id').split('/');
+			console.log(chatRemoveId);
+			socket.emit('chat remove', {id: chatRemoveId[1]});
+		}
+	}
+	
+	/*
+	触れた要素のid,classを取得
+	取得idをsocket.emitする
+	サーバーで削除操作する　idをmongodbに通知、コールバックでsodket.emitする。
+	サーバーから受けたデータを元に削除する。
+	
+	一番早いのはクライアントで削除をして、サーバーで削除操作、確認をする。
+	削除できないときだけ通知をクライアントに送り、クライアントでは未削除理由とチャットの復活作業をす
+	復活作業はmongoのコールバックで条件分岐して返す。
+	*/
 }
 
 //gps情報
