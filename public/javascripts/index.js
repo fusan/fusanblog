@@ -2,7 +2,7 @@ function id (selector) {
 	return document.getElementById(selector);
 }
 
-var socket = io.connect('https://fusanblog.herokuapp.com'); // 'http://localhost:4000' || 
+var socket = io.connect('http://localhost:4000'); //  || 'https://fusanblog.herokuapp.com'
     //クライアントからsocketオブジェクトをサーバーにemit　これが最初の挙動
     
     socket.on('news', function (data) {
@@ -130,8 +130,9 @@ function socketIo() {
 	field.addEventListener('mousemove', function(e) {
 	  //console.log(e.pageX, e.pageY);
 	  socket.emit('mousemove', {
-	  	positionX : e.pageX - id('socketTestField').offsetLeft,
-	  	positionY: e.pageY - id('socketTestField').offsetTop});
+	  	positionX : e.pageX - id('socketTestField').offsetLeft -4,
+	  	positionY: e.pageY - id('socketTestField').offsetTop -4
+	  });
 	},false);
 
 	socket.on('mousemove return', function(data) {
@@ -160,23 +161,29 @@ function socketIo() {
 	/* chat system */
 	id('sendMessage').addEventListener('click', function() {
 		var pushTime = new Date();
-		var userID = id('userID').value !='' ? id('userID').value : '未記入';
-		var message = id('message').value !='' ? id('message').value : '未記入';
+		var userID = id('userID').value !='' ? id('userID').value : '' ;
+		var message = id('message').value !='' ? id('message').value : '';
 		var photo = photoFile;
 
-		console.log('<img src="'+photo+'">');
+		//console.log('<img src="'+photo+'">');
 
 		var pushData = {pushTime: pushTime, userID: userID, message: message, photo: photo};
 
 		//socketでクライアントへ送信
-		socket.emit('message send', pushData);
+		if(pushData.userID != '' && pushData.message != '') {
+			socket.emit('message send', pushData);
+		} else {
+			alert('must id & message!');
+			return;
+		}
+		
 	},false);
 
 	//チャット履歴の読み込み
 	socket.emit('chat initial send', {load: 'start'});
 
 	//チャット投稿
-	socket.on('message return', function(data) {　
+	socket.on('message send return', function(data) {　
 		//console.log(data);
 		chatline(data);  });
 
@@ -273,30 +280,37 @@ function imageMin(photo) {
 		//console.log(photoFile);
 }
 
-function chatline(data) {
+function chatline(data,event) {
 	console.log(data.length == 0 ? 'no chat data!' : data);
 
 	id('stage').innerHTML = '';
 
-		for(var i=0,n=data.length ;i<n;i++) {
-		  	(function () {
-		  		console.log('socketから受け取るID:', this._id);
+	for(var i=0,n=data.length ;i<n;i++) {
+	  	(function () {
+	  		console.log('socketから受け取るID:', this._id);
+	  		//console.log(i,n);
 
-		  	  	var date = new Date(this.pushTime);
-		  	  	var time = date.getHours() + '.' + date.getMinutes() + '.' + date.getSeconds();
+	  	  	var date = new Date(this.pushTime);
+	  	  	var time = date.getHours() + '.' + date.getMinutes() + '.' + date.getSeconds();
 
-		  	  	var html = '<div><span class="profile"></span><span class="users">' + this.userID + '</span>';
-		  	  		html += '<span class="time">'+ time +'</span><span class="comment">' + this.message + '</span>';
-		  	  		html += '<span><img src="'+ this.photo +'"></span>';
-		  	  		html += '<span id="' + i + '/' + this._id +'" class="chatRemove" onclick="chatRemove('+ i +');">Re</span></div>';
+	  	  	var html = '<div><span class="profile"></span><span class="users">' + this.userID + '</span>';
+	  	  		html += '<span class="time">'+ time +'</span><span class="comment">' + this.message + '</span>';
+	  	  		this.photo === undefined ? html +='' : html += '<span><img src="'+ this.photo +'"></span>';
+	  	  		html += '<span id="' + i + '/' + this._id +'" class="chatRemove" onclick="chatRemove('+ i +');"><img src="./images/icon_check_alt.svg"></span></div>';
 
-		    	id('stage').innerHTML += html;
-
-		    	console.log('dom生成後にチェック：', document.getElementById(i+ '/' +this._id));
-
-		  	  	//id(this._id).addEventListener('click', chatRemove, false);
-		  	}).call(data[i],i);
-		}
+	    	
+	    	if(i == n-1) {
+	    		//id('stage').innerHTML += html; 
+	    		id('stage').innerHTML = html + id('stage').innerHTML;
+	    		id(i+'/'+this._id).parentNode.setAttribute('class', 'newChat');
+	    		console.log( i ,'番目でスライドアップ');
+	    	} else {
+	    		//id('stage').innerHTML += html;	
+	    		id('stage').innerHTML = html + id('stage').innerHTML;
+	    	}
+	    	console.log('dom生成後にチェック：', document.getElementById(i+ '/' +this._id));
+	  	}).call(data[i],i);
+	}
 }
 
 //chat 削除
@@ -306,10 +320,10 @@ function chatRemove(num) {
 	var chats = document.getElementsByClassName('chatRemove');
 
 	for(var i=0,n=chats.length;i<n;i++) {
-		//console.log('チャットID:', chats[i].getAttribute('id'));
-		if(num == i) {
-			var chatRemoveId = chats[i].getAttribute('id').split('/');
+		var chatRemoveId = chats[i].getAttribute('id').split('/');
 			console.log(chatRemoveId);
+		//console.log('チャットID:', chats[i].getAttribute('id'));
+		if(num == parseInt(chatRemoveId[i])) {
 			socket.emit('chat remove', {id: chatRemoveId[1]});
 		}
 	}
