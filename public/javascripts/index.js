@@ -315,15 +315,15 @@ function chatline(data,event) {
 
 //chat 削除
 function chatRemove(num) {
-	//console.log('チャットナンバリング:',num);
+	console.log('削除引数:',num);
 
 	var chats = document.getElementsByClassName('chatRemove');
 
 	for(var i=0,n=chats.length;i<n;i++) {
 		var chatRemoveId = chats[i].getAttribute('id').split('/');
-			console.log(chatRemoveId);
+			console.log('削除チャットID', parseInt(chatRemoveId[0]));
 		//console.log('チャットID:', chats[i].getAttribute('id'));
-		if(num == parseInt(chatRemoveId[i])) {
+		if(num === parseInt(chatRemoveId[0])) {
 			socket.emit('chat remove', {id: chatRemoveId[1]});
 		}
 	}
