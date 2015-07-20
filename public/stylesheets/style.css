@@ -82,16 +82,21 @@ header button {
 }
 
 #stage {
+	overflow: scroll;
 	float: left;
 	width: 100%;
-	height: auto;
+	height: 300px;
 }
 
 #stage > div > span {
-	margin: 5px 10px 0 5px;
+	display: inline-block;
+	margin: 4px ;
+	padding: 0;
 }
 
 #stage > div {
+	margin: 0;
+	padding: 0;
 	height: auto;
 	width: 100%;
 	box-shadow: 0 0 1px gray;
@@ -100,6 +105,8 @@ header button {
 /* chat */
 .profile {
 	display: inline-block;
+	margin: 4px;
+	padding: 0;
 	height: 36px;
 	width: 36px;
 	line-height: 36px;
@@ -126,8 +133,25 @@ header button {
 }
 
 .newChat {
+	margin: 0;
+	padding: 0;
 	background: rgba(0,0,0,.16);
 	-webkit-filter: blur(0px);
 	-webkit-transition: all 2s ease 0 ;
+}
+
+.photoFrame {
+	display: inline-block;
+	margin: 0;
+	padding: 0;
+	height: auto;
+	width: auto;
+	background: white;
+	box-shadow: 0 0 1px gray;
+}
+
+.photoFrame > img {
+	margin: 4px;
+	box-shadow: 0 0 1px gray;
 }
 

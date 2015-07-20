@@ -1,30 +1,22 @@
-function id (selector) {
-	return document.getElementById(selector);
-}
-
-var socket = io.connect('https://fusanblog.herokuapp.com'); //'http://localhost:4000'
-    //クライアントからsocketオブジェクトをサーバーにemit　これが最初の挙動
-    
-    socket.on('news', function (data) {
-        console.log(data);
-        socket.emit('my other event', { my: 'data' });
-      });
+var socket = io.connect('http://localhost:4000'); //  || 'https://fusanblog.herokuapp.com'
 
 /*
 フロントエンドのコントロールはすべてまかなえる。
 ajax, view DOM, contoroller function 
 */
 
+$(function() {
+
 //ボタンと非同期通信お紐付け
 var buttons = document.getElementsByTagName('button');
 
 for(var i=0,n=buttons.length;i<n;i++) {
-	console.log(buttons[i].getAttribute('id'));
-	change(buttons[i].getAttribute('id'));
+	//console.log(buttons[i].getAttribute('id'));
+	routing(buttons[i].getAttribute('id'));
 }
 
 /* id をリンクアドレスにして非同期アクセス　*/
-function change(selector) {
+function routing(selector) {
 	id(selector).addEventListener('click', function() {
 	//console.log('/' + selector);
 	var view = $.ajax({
@@ -33,33 +25,47 @@ function change(selector) {
 	});
 
 	view.done(function(data) {
-
+		//console.log(data);
 		//view *変動するviewを増やしたかったらselectorを増やす。
 		id('viewHeader').innerHTML = data.header;
 		id('viewArea').innerHTML = data.html;
 
 		//コントローラー
-		//本来はモジュールで外に出した方がわかりやすい。es6以降に成る。
-		//コントローラーを増やすことで機能を使いできる。
+		//ES6になったらmoduleにexportする
+		//ajaxとviewを組み合わせた関数モジュール群
 		if(selector == 'scraping') { scraping(); }
 		if(selector == 'upsert') { upsert(); }
-		if(selector == 'socket') { socketIo();}
-
-		console.log(selector +'ヘッダーとボディ', data);
+		if(selector == 'socket') { socketIo(); }
+		if(selector == 'bitcoin') { bitcoin(); }
 	});
 
 	},false);
 }
 
+function bitcoin() {
+	id('getBitcoinData').addEventListener('click', function() {
+		console.log('/' + this.getAttribute('id'));
+	/* bit coin api */
+	var bitcoin = $.ajax({
+		url: 'https://api.bitflyer.jp/v1/getticker',
+		type: 'GET'
+	});
+
+	bitcoin.done(function(data) {
+		console.log(data);
+	});
+},false);
+}
+
 function scraping() {
 	id('scrape').addEventListener('click',function() {
-		console.log('click');
+		//console.log('click');
 
 		var view = $.ajax({
 			url: '/scrape',
 			type: 'GET',
 			data: {'url': id('scrapeURL').value }
-		})
+		});
 
 		view.done(function(data) {
 			//var viewArea = id('viewArea').innerHTML;
@@ -72,12 +78,11 @@ function scraping() {
 }
 
 function upsert() {
-	$(function() {
     	id('insert').addEventListener('click', function() {
     		var $settlement = $('#settlement');
     		var $company = $('#company');
 
-    		if($settlement.val() !='' && $company.val() !='') {
+    		if($settlement.val() !=='' && $company.val() !=='') {
 
     			var test = $.ajax({
 	    			url: '/insert',
@@ -100,13 +105,12 @@ function upsert() {
 	    			}
 
 	    			$('#testFileld').html($ul);
-	    			console.log(data);
+	    			//console.log(data);
 	    		});
     		} else {
     			$('#testFileld').html('決算期と会社名を必ず入力してください');
     		}
     	},false);
-    });
 }
 
 //socket test page
@@ -137,6 +141,7 @@ function socketIo() {
 
 	socket.on('mousemove return', function(data) {
 	  $(function() {
+
 		$('#dot').css({
 		  	position: 'relative',
 		  	top: data.positionY,
@@ -183,9 +188,16 @@ function socketIo() {
 	socket.emit('chat initial send', {load: 'start'});
 
 	//チャット投稿
-	socket.on('message send return', function(data) {　
+	socket.on('message send return', function(data) {
 		//console.log(data);
-		chatline(data);  });
+		chatline(data);
+	});
+
+	socket.on('db alert', function(data) {
+		alert(data.message);
+		//var alert = id('alert').innerHTML = '<div>'+ data.message +'</div>';
+		//console.log(alert);
+	});
 
 	//チャット履歴読み込み
 	socket.on('chat initial return', function(data) { 
@@ -204,7 +216,7 @@ function socketIo() {
 	var reader = new FileReader();
 
 	id('photo').addEventListener('change', file, false);
-	//reader.addEventListener('load', fileCheck,false); file使用
+	reader.addEventListener('load', fileCheck,false);
 
 	function file(e) {
 		var target = e.target;
@@ -213,22 +225,19 @@ function socketIo() {
 		var blob_url = window.URL.createObjectURL(files[0]);
 		console.log(blob_url);
 
-		photoFile = imageMin(blob_url);
+		//photoFile = imageMin(blob_url);
 
- 		/*file 使用
+		//文字データにする
  		reader.readAsDataURL(files[0]);　
 		console.log(files[0]);
-		*/
 	}
 
-	/*file 使用
+	
 	function fileCheck() {
 		//アップロード前のチェック
-		photoFile = imageMin(reader.result);
+		photoFile = reader.result;
 		console.log('圧縮画像データ', photoFile);
 	}
-	*/
-	  
 }
 
 //画像圧縮
@@ -295,7 +304,7 @@ function chatline(data,event) {
 
 	  	  	var html = '<div><span class="profile"></span><span class="users">' + this.userID + '</span>';
 	  	  		html += '<span class="time">'+ time +'</span><span class="comment">' + this.message + '</span>';
-	  	  		this.photo === undefined ? html +='' : html += '<span><img src="'+ this.photo +'"></span>';
+	  	  		this.photo === undefined ? html +='' : html += '<span class="photoFrame"  id="'+ this._id +'"><img src="'+ this.photo +'"></span>';
 	  	  		html += '<span id="' + i + '/' + this._id +'" class="chatRemove" onclick="chatRemove('+ i +');"><img src="./images/icon_check_alt.svg"></span></div>';
 
 	    	
@@ -308,8 +317,36 @@ function chatline(data,event) {
 	    		//id('stage').innerHTML += html;	
 	    		id('stage').innerHTML = html + id('stage').innerHTML;
 	    	}
+
+
 	    	console.log('dom生成後にチェック：', document.getElementById(i+ '/' +this._id));
 	  	}).call(data[i],i);
+	}
+
+	id('message').value = '';
+	id('userID').value = '';
+	id('photo').value = '';
+
+	//画像　download 
+	var imgs = document.getElementsByClassName('photoFrame');
+	imgDownload(imgs);
+}
+
+function imgDownload(imgs) {
+	
+	//console.log(imgs.length);
+	for(var i=0,n=imgs.length; i<n; i++) {
+		imgs[i].addEventListener('click', function() {
+			//console.log(this.id);
+			var download = $.ajax({
+				url: '/download/' + this.id,
+				type: 'GET'
+			});
+
+			download.done(function(data) {
+				console.log(data);
+			});
+		},false);
 	}
 }
 
@@ -368,6 +405,10 @@ function errFunc(error) {
   console.log(error);
 }
 
+function id (selector) {
+	return document.getElementById(selector);
+}
+
 /*
 //数値配列のループ処理　ES6
 var array = [1,2,3,100,200,300];
@@ -381,3 +422,5 @@ for (var value of srtingArray) {
     console.log(value);
 }
 */
+
+});
