@@ -1,11 +1,9 @@
-var socket = io.connect('http://localhost:4000'); //  || 'https://fusanblog.herokuapp.com'
+var socket = io.connect('https://fusanblog.herokuapp.com'); //'http://localhost:4000'
 
 /*
 フロントエンドのコントロールはすべてまかなえる。
 ajax, view DOM, contoroller function 
 */
-
-$(function() {
 
 //ボタンと非同期通信お紐付け
 var buttons = document.getElementsByTagName('button');
@@ -15,7 +13,7 @@ for(var i=0,n=buttons.length;i<n;i++) {
 	routing(buttons[i].getAttribute('id'));
 }
 
-/* id をリンクアドレスにして非同期アクセス　*/
+/* contoroler module　*/
 function routing(selector) {
 	id(selector).addEventListener('click', function() {
 	//console.log('/' + selector);
@@ -42,21 +40,29 @@ function routing(selector) {
 	},false);
 }
 
+//bitcoin test module
 function bitcoin() {
+	
 	id('getBitcoinData').addEventListener('click', function() {
 		console.log('/' + this.getAttribute('id'));
-	/* bit coin api */
-	var bitcoin = $.ajax({
-		url: 'https://api.bitflyer.jp/v1/getticker',
-		type: 'GET'
-	});
+	
+		var bitcoin = $.ajax({
+			url: '/' + this.getAttribute('id'),
+			type: 'GET'
+		});
 
-	bitcoin.done(function(data) {
-		console.log(data);
-	});
-},false);
+		bitcoin.done(function(data) {
+			var ticker = JSON.parse(data);
+			console.log(ticker);
+			id('bitcoinStage').innerHTML = ticker.product_code + ticker.timestamp; 
+			//console.log(data);
+		}).fail(function(err) {
+			console.log(err.state());
+		});
+	},false);
 }
 
+/* scraping test module */
 function scraping() {
 	id('scrape').addEventListener('click',function() {
 		//console.log('click');
@@ -77,7 +83,9 @@ function scraping() {
 	},false);
 }
 
+/* mongoose test module */
 function upsert() {
+	$(function() {
     	id('insert').addEventListener('click', function() {
     		var $settlement = $('#settlement');
     		var $company = $('#company');
@@ -111,9 +119,10 @@ function upsert() {
     			$('#testFileld').html('決算期と会社名を必ず入力してください');
     		}
     	},false);
+    });
 }
 
-//socket test page
+/* socket test module */
 function socketIo() {
 	var field = id('socketTestField');
 	var photoFile;
@@ -165,17 +174,25 @@ function socketIo() {
 
 	/* chat system */
 	id('sendMessage').addEventListener('click', function() {
+
 		var pushTime = new Date();
-		var userID = id('userID').value !='' ? id('userID').value : '' ;
-		var message = id('message').value !='' ? id('message').value : '';
-		var photo = photoFile;
+		var userID = id('userID').value !=='' ? id('userID').value : '';
+		var message = id('message').value !=='' ? id('message').value : '';
+		var photo;
+			photoFile === undefined ? photo = '' : photo = photoFile;
 
 		//console.log('<img src="'+photo+'">');
+		var pushData = {
+			pushTime: pushTime,
+			userID: userID,
+			message: message,
+			photo: photo};
 
-		var pushData = {pushTime: pushTime, userID: userID, message: message, photo: photo};
+		console.log(pushData);
 
 		//socketでクライアントへ送信
-		if(pushData.userID != '' && pushData.message != '') {
+		if(pushData.userID !== '' && pushData.message !== '') {
+			id('socketTestFieldInner').innerHTML = '';
 			socket.emit('message send', pushData);
 		} else {
 			alert('must id & message!');
@@ -210,7 +227,6 @@ function socketIo() {
 		chatline(data);
 	});
 
-	//画像投稿
 	// 参考　http://www.html5.jp/canvas/ref/HTMLCanvasElement/toDataURL.html
 	// canvasで画像圧縮　> 　toDataURLメソッドで　data:URLに変換　> socketに渡す。
 	var reader = new FileReader();
@@ -222,75 +238,54 @@ function socketIo() {
 		var target = e.target;
 		var files = target.files;
 
-		var blob_url = window.URL.createObjectURL(files[0]);
-		console.log(blob_url);
-
-		//photoFile = imageMin(blob_url);
-
 		//文字データにする
  		reader.readAsDataURL(files[0]);　
-		console.log(files[0]);
 	}
 
-	
 	function fileCheck() {
 		//アップロード前のチェック
-		photoFile = reader.result;
-		console.log('圧縮画像データ', photoFile);
+		photoFile = imgThumnail(reader.result);
 	}
 }
 
-//画像圧縮
-function imageMin(photo) {
+//check before uploading image 
+function imgThumnail(photo) {
+
 	id('socketTestFieldInner').innerHTML = '';
-	var canvas = document.createElement('canvas');
 
-	var ctx = canvas.getContext('2d');
+	var image = new Image();
+		image.src = photo;
 
-	if(!canvas || !canvas.getContext('2d')) {
-			console.log('no canvas');
+	var caution = document.createElement('span'),
+		text = document.createTextNode('よかったら送信ボタン押してね！');
+	
+	caution.appendChild(text);
+
+	id('socketTestFieldInner').appendChild(image);
+	id('socketTestFieldInner').appendChild(caution);
+
+	//socketに渡す。
+	var photoData = {};
+		photoData.photo = photo;
+
+	if(image.width > 300) {
+		var ratio = 300 / image.width;
+
+		photoData.width  = image.width = image.width * ratio;
+		photoData.height = image.height = image.height * ratio;
+	} else {
+		photoData.width = image.width;
+		photoData.height = image.height;
 	}
 
-	id('socketTestFieldInner').appendChild(canvas);
+	console.log(photoData);
 
-	var canvasWidth = (id('socketTestFieldInner').currentStyle || document.defaultView.getComputedStyle(id('socketTestFieldInner'), '')).width;
-	var canvasHeight = (id('socketTestFieldInner').currentStyle || document.defaultView.getComputedStyle(id('socketTestFieldInner'), '')).height;
-
-	canvas.width = parseInt(canvasWidth);
-	canvas.height = parseInt(canvasHeight);
-	//console.log(canvasWidth, canvasHeight);
-	//ctx.strokeRect(0,0,canvasWidth,canvasHeight);
-
-	var img = new Image();
-		img.src = photo;
-
-	img.onload = function() {
-			//ロードしないと取れない。
-			console.log('元データ幅',img.width,'元データ高さ', img.height);
-			var ratio = img.width / img.height;
-
-			if( img.width > img.height) { 
-				console.log('横長');
-				ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.width / ratio, canvas.height);
-			} else { 
-				console.log('縦長');
-				ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.width * ratio, canvas.width);
-			}
-			//ctx.fillStyle = 'white';
-			//ctx.strokeStyle = 'gray';
-			//ctx.fillText('問題なければ送信', 10,150);
-		}
-
-		//canvasを画像データに変換
-		var minPhoto = canvas.toDataURL();
-
-		//socketに渡す。
-		return minPhoto;
-		//console.log(photoFile);
+	return photoData;
 }
 
+//create chat line
 function chatline(data,event) {
-	console.log(data.length == 0 ? 'no chat data!' : data);
+	console.log(data.length === 0 ? 'no chat data!' : data);
 
 	id('stage').innerHTML = '';
 
@@ -304,7 +299,7 @@ function chatline(data,event) {
 
 	  	  	var html = '<div><span class="profile"></span><span class="users">' + this.userID + '</span>';
 	  	  		html += '<span class="time">'+ time +'</span><span class="comment">' + this.message + '</span>';
-	  	  		this.photo === undefined ? html +='' : html += '<span class="photoFrame"  id="'+ this._id +'"><img src="'+ this.photo +'"></span>';
+	  	  		this.photo === undefined ? html +='' : html += '<span class="photoFrame"  id="'+ this._id +'"><img src="'+ this.photo.photo +'" width="'+ this.photo.width +'" height="'+ this.photo.height +'"></span>';
 	  	  		html += '<span id="' + i + '/' + this._id +'" class="chatRemove" onclick="chatRemove('+ i +');"><img src="./images/icon_check_alt.svg"></span></div>';
 
 	    	
@@ -332,6 +327,7 @@ function chatline(data,event) {
 	imgDownload(imgs);
 }
 
+//download image
 function imgDownload(imgs) {
 	
 	//console.log(imgs.length);
@@ -350,7 +346,7 @@ function imgDownload(imgs) {
 	}
 }
 
-//chat 削除
+//remove chat
 function chatRemove(num) {
 	console.log('削除引数:',num);
 
@@ -377,7 +373,7 @@ function chatRemove(num) {
 	*/
 }
 
-//gps情報
+//get gps data
 function getGPS() {
 	console.log('position');
 	var count = 0;
@@ -408,19 +404,3 @@ function errFunc(error) {
 function id (selector) {
 	return document.getElementById(selector);
 }
-
-/*
-//数値配列のループ処理　ES6
-var array = [1,2,3,100,200,300];
-for (var i in array) {
-    console.log(array[i] + ':' +i);
-}
-
-//文字列配列のループ処理 ES6
-var srtingArray = ['fusan','youtan','umhan','kimutan','chantiver'];
-for (var value of srtingArray) {
-    console.log(value);
-}
-*/
-
-});

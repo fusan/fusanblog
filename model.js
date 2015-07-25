@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-var url = 'mongodb://localhost/list';//'mongodb://heroku_99cv7jnx:urpqu046rhf5v623i3ckma1d35@ds047612.mongolab.com:47612/heroku_99cv7jnx/blog';// ||  
+var url = 'mongodb://heroku_99cv7jnx:urpqu046rhf5v623i3ckma1d35@ds047612.mongolab.com:47612/heroku_99cv7jnx/blog';//'mongodb://localhost/blog';//// ||  
 var db = mongoose.createConnection(url, function(err, res) {
 	if(err) {
 		console.log('error connected:' + url + '-' + err);
@@ -18,7 +18,7 @@ var SocketSchema = new mongoose.Schema({
 	'pushTime': String,
 	'userID': String,
 	'message': String,
-	'photo': String
+	'photo': Object
 }, {collection: 'chat'});
 
 exports.User = db.model('User', UserSchema);

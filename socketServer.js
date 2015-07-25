@@ -50,19 +50,20 @@ exports.listen = function(server) {
         log.message = validator.escape(data.message);
         log.photo = data.photo;
 
-        //console.log(log);
+        console.log(log);
 
       Chat.count({}, function(err, data) {
-        //console.log(data);
+        console.log(data);
         if(data < 10) {
           var chat = new Chat(log);
 
           chat.save(function(err) {
+
               if(err) throw err;
               sendChat();
             });
-
           } else {
+
             sendChat();
             socket.emit('db alert', {message : 'db arraive upper limit'}); 
           }
@@ -90,10 +91,25 @@ exports.listen = function(server) {
       });
     });
 
+    socket.on('bitcoin', function(data) {
+      var promise = new Promise(function(resolve, reject) {
+        request('https://api.bitflyer.jp/v1/getticker', function(err, res, body) {
+          if (!err && res.statusCode == 200) {
+              console.log(body); // Show the HTML for the Google homepage. 
+              resolve(body);
+            }
+        });
+      });
+
+      promise.then(function(value) {
+        res.send(value);
+      });
+    });
+
   });
 
   //name space
   io2.on('connection', function(socket) {
     console.log('namespace ok');
   });
-}
+};

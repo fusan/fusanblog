@@ -11,7 +11,10 @@ var noodle = require('noodlejs');
 var validator = require('validator');
 //console.log(express);
 
+var request = require('request');
+var promise = require('es6-promise').Promise;
 var PubNub = require('pubnub');
+//var easyimage = require('easyimage');
 
 // Root
 router.get('/', function(req, res, next) {
@@ -25,7 +28,7 @@ router.get('/stream', function(req, res) {
 	var html = '<h2>stream</h2>';
 
 	res.send({html: html, header: header,route: req.url.split('/')[1]});
-})
+});
 
 router.get('/upsert', function(req,res) {
 	//console.log(req.url);
@@ -44,7 +47,7 @@ router.get('/upsert', function(req,res) {
 		html += '<div id="testFileld"></div>';
 
 	res.send({html: html, header: header,route: req.url.split('/')[1]});
-})
+});
 
 //noodlejsモジュールのテスト
 router.get('/scraping', function(req, res) {
@@ -64,7 +67,7 @@ router.get('/scrape', function(req, res) {
 		'type': 'html',
 		'selector': 'body',
 		'extract': 'html'
-	}
+	};
 
 	noodle.query(query).then(function(results) {
 		var html = results.results[0].results[0];
@@ -91,7 +94,21 @@ router.get('/socket', function(req,res) {
 
 	    res.send({html: html, header: header,route: req.url.split('/')[1]});
 
-})
+	    /*easyimage.resize({
+           src:'./public/images/IMG_0449.jpg', 
+           dst:'./public/images/output/0449.jpg',
+           width:500, height:500,
+           cropwidth:128, cropheight:128,
+           x:0, y:0
+        }).then(
+            function(file) {
+                  console.log(file);
+                }, function (err) {
+                  console.log(err);
+                }
+              );*/
+
+});
 
 //年度データがなければ丸ごと挿入、修正値があれば修正値のみ変更　upsertの威力
 router.get('/insert', function(req, res) {
@@ -124,9 +141,28 @@ router.get('/download/:id', function(req, res) {
 router.get('/bitcoin', function(req,res) {
 	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
 	var html = '<div><button id="getBitcoinData">データ取得</button></div>';
+		html += '<div id="bitcoinStage"></div>';
 
 	res.send({html: html, header: header,route: req.url.split('/')[1]});
 });
+
+router.get('/getBitcoinData', function(req, res) {
+
+	var promise = new Promise(function(resolve, reject) {
+		request('https://api.bitflyer.jp/v1/getticker', function(err, res, body) {
+			if (!err && res.statusCode == 200) {
+			    console.log(body); // Show the HTML for the Google homepage. 
+			    resolve(body);
+			  }
+		});
+	});
+
+	promise.then(function(value) {
+		res.send(value);
+	});
+});
+
+
 
 /*
 	目的：①エンジニア仲間を増やしてそこから仕事を取る、一緒に仕事をする
