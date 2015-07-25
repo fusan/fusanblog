@@ -1,4 +1,4 @@
-var socket = io.connect('https://fusanblog.herokuapp.com'); //'http://localhost:4000'
+var socket = io.connect('http://localhost:4000'); //'https://fusanblog.herokuapp.com'
 
 /*
 フロントエンドのコントロールはすべてまかなえる。
@@ -45,21 +45,22 @@ function bitcoin() {
 	
 	id('getBitcoinData').addEventListener('click', function() {
 		console.log('/' + this.getAttribute('id'));
-	
-		var bitcoin = $.ajax({
-			url: '/' + this.getAttribute('id'),
-			type: 'GET'
-		});
 
-		bitcoin.done(function(data) {
-			var ticker = JSON.parse(data);
-			console.log(ticker);
-			id('bitcoinStage').innerHTML = ticker.product_code + ticker.timestamp; 
-			//console.log(data);
-		}).fail(function(err) {
-			console.log(err.state());
-		});
-	},false);
+	var bitcoin = $.ajax({
+		url: '/' + this.getAttribute('id'),
+		type: 'GET'
+	});
+
+	bitcoin.done(function(data) {
+		var ticker = JSON.parse(data);
+		console.log(ticker);
+		id('bitcoinStage').innerHTML = ticker.product_code + ticker.timestamp; 
+		//console.log(data);
+	}).fail(function(err) {
+		console.log(err.state());
+	});
+},false);
+
 }
 
 /* scraping test module */
@@ -181,6 +182,8 @@ function socketIo() {
 		var photo;
 			photoFile === undefined ? photo = '' : photo = photoFile;
 
+		var photo = photoFile;
+
 		//console.log('<img src="'+photo+'">');
 		var pushData = {
 			pushTime: pushTime,
@@ -240,6 +243,7 @@ function socketIo() {
 
 		//文字データにする
  		reader.readAsDataURL(files[0]);　
+
 	}
 
 	function fileCheck() {

@@ -95,7 +95,6 @@ exports.listen = function(server) {
       var promise = new Promise(function(resolve, reject) {
         request('https://api.bitflyer.jp/v1/getticker', function(err, res, body) {
           if (!err && res.statusCode == 200) {
-              console.log(body); // Show the HTML for the Google homepage. 
               resolve(body);
             }
         });
