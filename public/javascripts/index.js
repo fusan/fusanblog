@@ -1,4 +1,4 @@
-var socket = io.connect('https://fusanblog.herokuapp.com'); //'http://localhost:4000'
+var socket = io.connect('http://localhost:4000'); //'https://fusanblog.herokuapp.com'
 
 /*
 フロントエンドのコントロールはすべてまかなえる。
@@ -44,22 +44,34 @@ function routing(selector) {
 function bitcoin() {
 	
 	id('getBitcoinData').addEventListener('click', function() {
-		console.log('/' + this.getAttribute('id'));
+		//console.log('/' + this.getAttribute('id'));
+		var count = 0;
+		(function getBid(url) {
+			count++;
 
-	var bitcoin = $.ajax({
-		url: '/' + this.getAttribute('id'),
-		type: 'GET'
-	});
+			var bitcoin = $.ajax({
+				url: '/getBitcoinData',
+				type: 'GET'
+			});
 
-	bitcoin.done(function(data) {
-		var ticker = JSON.parse(data);
-		console.log(ticker);
-		id('bitcoinStage').innerHTML = ticker.product_code + ticker.timestamp; 
-		//console.log(data);
-	}).fail(function(err) {
-		console.log(err.state());
-	});
-},false);
+			bitcoin.done(function(data) {
+				//http api
+				var ticker = JSON.parse(data);
+				console.log(ticker);
+				id('bitcoinStage').innerHTML += ticker.product_code + ':' + ticker.timestamp + ':' +ticker.volume + '<br>'; 
+				
+				console.log(data);
+			}).fail(function(err) {
+				console.log(err.state());
+			});
+
+			var timerID = setTimeout(getBid, 1000);
+			if(count === 10) {
+				clearTimeout(timerID);
+			}
+
+		}());
+	},false);
 
 }
 
@@ -268,24 +280,55 @@ function imgThumnail(photo) {
 	id('socketTestFieldInner').appendChild(image);
 	id('socketTestFieldInner').appendChild(caution);
 
-	//socketに渡す。
+
 	var photoData = {};
 		photoData.photo = photo;
 
-	if(image.width > 300) {
-		var ratio = 300 / image.width;
+	//socketに渡す
+	image.onload = function() {
+		var ratio = 300 / this.naturalWidth;
 
-		photoData.width  = image.width = image.width * ratio;
-		photoData.height = image.height = image.height * ratio;
-	} else {
-		photoData.width = image.width;
-		photoData.height = image.height;
+		photoData.width = this.width = this.naturalWidth * ratio;
+		photoData.height = this.height = this.naturalHeight * ratio;
+
+		console.log(this.width, this.naturalWidth);
+		console.log(this.height, this.naturalHeight);
+
+		
+		this.addEventListener('click', function() {
+			var rad = 90;
+			console.log('click');
+
+			$(this).css({
+				'-webkit-transform-origin': '50% 50%',
+				'-webkit-transform': 'rotate(0deg)'
+			}).animate({
+				'-webkit-transform-origin': '50% 50%',
+				'-webkit-transform': 'rotate(' + rad + 'deg)'	
+			},500);
+
+		},false);
+
 	}
 
 	console.log(photoData);
 
 	return photoData;
-}
+
+/*
+	if(image.naturalWidth > 300) {
+		console.log('圧縮');
+		var ratio = 300 / image.naturalWidth;
+
+		photoData.width  = image.width = image.naturalWidth * ratio;
+		photoData.height = image.height = image.naturalHeight * ratio;
+	} else {
+		console.log('非圧縮');
+		photoData.width  = image.width = image.naturalWidth;
+		photoData.height = image.height = image.naturalHeight;
+	}*/
+
+	}
 
 //create chat line
 function chatline(data,event) {

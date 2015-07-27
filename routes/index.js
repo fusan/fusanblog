@@ -54,7 +54,7 @@ router.get('/scraping', function(req, res) {
 
 	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
 		header += '<div style="margin:.4rem .2rem;">URLを入力するとスクレイピング開始。module : noodle</div>';
-		header += '<div style="background: rgba(0,0,0,.08);margin:.4rem .2rem;">URL : http://www. <input type="text" name="scrape" id="scrapeURL"> .com/ <button id="scrape">scrape</button></div>';
+		header += '<div style="background: rgba(0,0,0,.08);margin:.4rem .2rem;">URL : http://www. <input type="text" name="scrape" id="scrapeURL"><button id="scrape">scrape</button></div>';
 	var html = '';
 	
 	res.send({html: html, header: header,route: req.url.split('/')[1]});
@@ -63,7 +63,7 @@ router.get('/scraping', function(req, res) {
 router.get('/scrape', function(req, res) {
 	//console.log(req.query);
 	var query = {
-		'url': 'http://www.' + req.query.url + '.com',
+		'url': 'http://www.' + req.query.url,
 		'type': 'html',
 		'selector': 'body',
 		'extract': 'html'
@@ -72,7 +72,7 @@ router.get('/scrape', function(req, res) {
 	noodle.query(query).then(function(results) {
 		var html = results.results[0].results[0];
 		var header = '<h4 id="viewHeaderTitle">'+ req.query.url +'</h4>';
-			header += '<div style="background: rgba(0,0,0,.08);margin:.4rem .2rem;">URL : http://www. <input type="text" name="scrape" id="scrapeURL"> .com/ <button id="scrape">scrape</button></div>';
+			header += '<div style="background: rgba(0,0,0,.08);margin:.4rem .2rem;">URL : http://www. <input type="text" name="scrape" id="scrapeURL"><button id="scrape">scrape</button></div>';
 
 		res.send({html: html, header: header,route: req.url.split('/')[1]});
 	});
@@ -83,9 +83,11 @@ router.get('/socket', function(req,res) {
 	//console.log(req.query)
 	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
 
-	var html = '<button id="button">GPSデータ取得</button><input type="text" name="formTest" value="" placeholder="リアルタイムで反映" id="formTest">';
+	var html = '<h4>Working Space</h4>';
 		html += '<!-- 位置情報ログ　--><div id="socketTestField"><div id="socketTestFieldInner"><span id="dot"></span></div></div>';
 	    html += '<!-- chat line --><section id="chat"><div id="chatTimeLine">';
+	    html += '<button id="button">GPSデータ取得</button><input type="text" name="formTest" value="" placeholder="リアルタイムで反映" id="formTest">';
+	    
 	    html += '<div id="submit"><input type="text" name="userID" value="" placeholder="Chat ID" id="userID">';
 	    html += '<input type="text" name="message" value="" placeholder="コメント" id="message">';
 	    html += '<input type="file" accept="image/*" name="photo" id="photo" multiple>';
@@ -147,10 +149,12 @@ router.get('/bitcoin', function(req,res) {
 });
 
 router.get('/getBitcoinData', function(req, res) {
-
+	//console.log('req');
+	//http api
 	var promise = new Promise(function(resolve, reject) {
 		request('https://api.bitflyer.jp/v1/getticker', function(err, res, body) {
 			if (!err && res.statusCode == 200) {
+				//console.log(res, body);
 			    resolve(body);
 			  }
 		});
