@@ -58,12 +58,12 @@ function bitcoin() {
 			bitcoin.done(function(data) {
 				//http api
 				var ticker = JSON.parse(data);
-				console.log(ticker);
+				//console.log(ticker);
 				id('bitcoinStage').innerHTML += ticker.product_code + ':' + ticker.timestamp + ':' +ticker.volume + '<br>'; 
 				
-				console.log(data);
+				//console.log(data);
 			}).fail(function(err) {
-				console.log(err.state());
+				//console.log(err.state());
 			});
 
 			var timerID = setTimeout(getBid, 1000);
@@ -92,7 +92,7 @@ function scraping() {
 			id('viewHeader').innerHTML = data.header;
 			id('viewArea').innerHTML = data.html;
 			scraping();
-			console.log(data);
+			//console.log(data);
 		});
 	},false);
 }
@@ -142,13 +142,13 @@ function socketIo() {
 	var photoFile;
 
 	//console.log(field.currentStyle || document.defaultView.getComputedStyle(field, '').left);
-	console.log(id('socketTestField').offsetLeft,id('socketTestField').offsetTop);
+	//console.log(id('socketTestField').offsetLeft,id('socketTestField').offsetTop);
 
 	/* geo location  */
 	id('button').addEventListener('click', getGPS , false);
 
 	socket.on('client push', function(data) {
-		console.log(data[0]);
+		//console.log(data[0]);
 		id('socketTestField').style.boxShadow = '0 0 2px green';
 	    field.innerHTML  = '緯度：' + data[0].latitude + '<br>' + field.innerHTML;
 	  });
@@ -204,7 +204,7 @@ function socketIo() {
 			message: message,
 			photo: photo};
 
-		console.log(pushData);
+		//console.log(pushData);
 
 		//socketでクライアントへ送信
 		if(pushData.userID !== '' && pushData.message !== '') {
@@ -292,13 +292,13 @@ function imgThumnail(photo) {
 		photoData.width = this.width = this.naturalWidth * ratio;
 		photoData.height = this.height = this.naturalHeight * ratio;
 
-		console.log(this.width, this.naturalWidth);
-		console.log(this.height, this.naturalHeight);
+		//console.log(this.width, this.naturalWidth);
+		//console.log(this.height, this.naturalHeight);
 
 		
 		this.addEventListener('click', function() {
 			var rad = 90;
-			console.log('click');
+			//console.log('click');
 
 			$(this).css({
 				'-webkit-transform-origin': '50% 50%',
@@ -333,13 +333,13 @@ function imgThumnail(photo) {
 
 //create chat line
 function chatline(data,event) {
-	console.log(data.length === 0 ? 'no chat data!' : data);
+	//console.log(data.length === 0 ? 'no chat data!' : data);
 
 	id('stage').innerHTML = '';
 
 	for(var i=0,n=data.length ;i<n;i++) {
 	  	(function () {
-	  		console.log('socketから受け取るID:', this._id);
+	  		//console.log('socketから受け取るID:', this._id);
 	  		//console.log(i,n);
 
 	  	  	var date = new Date(this.pushTime);
@@ -355,14 +355,14 @@ function chatline(data,event) {
 	    		//id('stage').innerHTML += html; 
 	    		id('stage').innerHTML = html + id('stage').innerHTML;
 	    		id(i+'/'+this._id).parentNode.setAttribute('class', 'newChat');
-	    		console.log( i ,'番目でスライドアップ');
+	    		//console.log( i ,'番目でスライドアップ');
 	    	} else {
 	    		//id('stage').innerHTML += html;	
 	    		id('stage').innerHTML = html + id('stage').innerHTML;
 	    	}
 
 
-	    	console.log('dom生成後にチェック：', document.getElementById(i+ '/' +this._id));
+	    	//console.log('dom生成後にチェック：', document.getElementById(i+ '/' +this._id));
 	  	}).call(data[i],i);
 	}
 
@@ -388,7 +388,7 @@ function imgDownload(imgs) {
 			});
 
 			download.done(function(data) {
-				console.log(data);
+				//console.log(data);
 			});
 		},false);
 	}
@@ -396,13 +396,13 @@ function imgDownload(imgs) {
 
 //remove chat
 function chatRemove(num) {
-	console.log('削除引数:',num);
+	//console.log('削除引数:',num);
 
 	var chats = document.getElementsByClassName('chatRemove');
 
 	for(var i=0,n=chats.length;i<n;i++) {
 		var chatRemoveId = chats[i].getAttribute('id').split('/');
-			console.log('削除チャットID', parseInt(chatRemoveId[0]));
+			//console.log('削除チャットID', parseInt(chatRemoveId[0]));
 		//console.log('チャットID:', chats[i].getAttribute('id'));
 		if(num === parseInt(chatRemoveId[0])) {
 			socket.emit('chat remove', {id: chatRemoveId[1]});
@@ -423,7 +423,7 @@ function chatRemove(num) {
 
 //get gps data
 function getGPS() {
-	console.log('position');
+	//console.log('position');
 	var count = 0;
 	function getPositionByTime() {
 		    count++;
@@ -446,7 +446,7 @@ function successFunc(position) {
 }
 
 function errFunc(error) {
-  console.log(error);
+  //console.log(error);
 }
 
 function id (selector) {
