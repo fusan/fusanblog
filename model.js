@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 
-var url = 'mongodb://heroku_99cv7jnx:urpqu046rhf5v623i3ckma1d35@ds047612.mongolab.com:47612/heroku_99cv7jnx/blog';// 'mongodb://localhost/blog';//
+var url = 'mongodb://localhost/blog' || 'mongodb://heroku_99cv7jnx:urpqu046rhf5v623i3ckma1d35@ds047612.mongolab.com:47612/heroku_99cv7jnx/blog';// //
 
 var db = mongoose.createConnection(url, function(err, res) {
 	if(err) {

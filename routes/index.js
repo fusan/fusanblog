@@ -84,7 +84,7 @@ router.get('/socket', function(req,res) {
 	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
 
 	var html = '<h4>Working Space</h4>';
-		html += '<!-- 位置情報ログ　--><div id="socketTestField"><div id="socketTestFieldInner"><span id="dot"></span></div></div>';
+		html += '<!-- 位置情報ログ　--><div id="socketTestField"><div id="socketTestFieldInner"><span>２画面たちあげてください。broadcast</span><span id="dot"></span></div></div>';
 	    html += '<!-- chat line --><section id="chat"><div id="chatTimeLine">';
 	    html += '<button id="button">GPSデータ取得</button><input type="text" name="formTest" value="" placeholder="リアルタイムで反映" id="formTest">';
 	    
