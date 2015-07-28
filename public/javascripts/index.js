@@ -1,6 +1,3 @@
-//var socket = io.connect('http://localhost:4000');
-var socket = io.connect('https://fusanblog.herokuapp.com'); 
-
 /*
 フロントエンドのコントロールはすべてまかなえる。
 ajax, view DOM, contoroller function 
@@ -138,6 +135,9 @@ function upsert() {
 
 /* socket test module */
 function socketIo() {
+	//var socket = io.connect('http://localhost:4000');
+	var socket = io.connect('https://fusanblog.herokuapp.com'); 
+
 	var field = id('socketTestField');
 	var photoFile;
 

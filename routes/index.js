@@ -144,6 +144,7 @@ router.get('/bitcoin', function(req,res) {
 	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
 	var html = '<div><button id="getBitcoinData">データ取得</button></div>';
 		html += '<div id="bitcoinStage"></div>';
+		html += '<script src="http://cdn.pubnub.com/pubnub-3.7.12.min.js"></script>';
 
 	res.send({html: html, header: header,route: req.url.split('/')[1]});
 });
