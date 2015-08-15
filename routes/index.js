@@ -19,6 +19,17 @@ var PubNub = require('pubnub');
 // Root
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Test App' });
+
+  var sum;
+
+  for (var i=0,n=10000000;i<n|0;i = i+1) {
+  	if(i === 0) {var start = new Date().getMilliseconds();}
+  	sum += i;
+  	if(i === 9000000) { 
+  		var end = new Date().getMilliseconds();
+  		console.log(end,start,end - start);
+  	}
+  }
 });
 
 router.get('/stream', function(req, res) {

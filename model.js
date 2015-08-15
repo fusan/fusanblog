@@ -26,6 +26,3 @@ var SocketSchema = new mongoose.Schema({
 
 exports.User = db.model('User', UserSchema);
 exports.Chat = db.model('Chat', SocketSchema);
-
-
-

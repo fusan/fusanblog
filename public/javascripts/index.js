@@ -1,10 +1,10 @@
 /*
 フロントエンドのコントロールはすべてまかなえる。
-ajax, view DOM, contoroller function 
+ajax, view DOM, contoroller function
 */
 
 //var socket = io.connect('http://localhost:4000');
-var socket = io.connect('https://fusanblog.herokuapp.com'); 
+var socket = io.connect('https://fusanblog.herokuapp.com');
 
 //ボタンと非同期通信お紐付け
 var buttons = document.getElementsByTagName('button');
@@ -43,7 +43,7 @@ function routing(selector) {
 
 //bitcoin test module
 function bitcoin() {
-	
+
 	id('getBitcoinData').addEventListener('click', function() {
 		//console.log('/' + this.getAttribute('id'));
 		var count = 0;
@@ -59,8 +59,8 @@ function bitcoin() {
 				//http api
 				var ticker = JSON.parse(data);
 				//console.log(ticker);
-				id('bitcoinStage').innerHTML += ticker.product_code + ':' + ticker.timestamp + ':' +ticker.volume + '<br>'; 
-				
+				id('bitcoinStage').innerHTML += ticker.product_code + ':' + ticker.timestamp + ':' +ticker.volume + '<br>';
+
 				//console.log(data);
 			}).fail(function(err) {
 				//console.log(err.state());
@@ -215,7 +215,7 @@ function socketIo() {
 			alert('must id & message!');
 			return;
 		}
-		
+
 	},false);
 
 	//チャット履歴の読み込み
@@ -234,13 +234,13 @@ function socketIo() {
 	});
 
 	//チャット履歴読み込み
-	socket.on('chat initial return', function(data) { 
+	socket.on('chat initial return', function(data) {
 		//console.log(data);
 		chatline(data); });
-	
+
 	//チャット削除後
-	socket.on('chat remove return', function(data) { 
-		//console.log(data); 
+	socket.on('chat remove return', function(data) {
+		//console.log(data);
 		chatline(data);
 	});
 
@@ -266,7 +266,7 @@ function socketIo() {
 	}
 }
 
-//check before uploading image 
+//check before uploading image
 function imgThumnail(photo) {
 
 	id('socketTestFieldInner').innerHTML = '';
@@ -276,7 +276,7 @@ function imgThumnail(photo) {
 
 	var caution = document.createElement('span'),
 		text = document.createTextNode('よかったら送信ボタン押してね！');
-	
+
 	caution.appendChild(text);
 
 	id('socketTestFieldInner').appendChild(image);
@@ -296,7 +296,7 @@ function imgThumnail(photo) {
 		//console.log(this.width, this.naturalWidth);
 		//console.log(this.height, this.naturalHeight);
 
-		
+
 		this.addEventListener('click', function() {
 			var rad = 90;
 			//console.log('click');
@@ -306,7 +306,7 @@ function imgThumnail(photo) {
 				'-webkit-transform': 'rotate(0deg)'
 			}).animate({
 				'-webkit-transform-origin': '50% 50%',
-				'-webkit-transform': 'rotate(' + rad + 'deg)'	
+				'-webkit-transform': 'rotate(' + rad + 'deg)'
 			},500);
 
 		},false);
@@ -351,14 +351,14 @@ function chatline(data,event) {
 	  	  		this.photo === undefined ? html +='' : html += '<span class="photoFrame"  id="'+ this._id +'"><img src="'+ this.photo.photo +'" width="'+ this.photo.width +'" height="'+ this.photo.height +'"></span>';
 	  	  		html += '<span id="' + i + '/' + this._id +'" class="chatRemove" onclick="chatRemove('+ i +');"><img src="./images/icon_check_alt.svg"></span></div>';
 
-	    	
+
 	    	if(i == n-1) {
-	    		//id('stage').innerHTML += html; 
+	    		//id('stage').innerHTML += html;
 	    		id('stage').innerHTML = html + id('stage').innerHTML;
 	    		id(i+'/'+this._id).parentNode.setAttribute('class', 'newChat');
 	    		//console.log( i ,'番目でスライドアップ');
 	    	} else {
-	    		//id('stage').innerHTML += html;	
+	    		//id('stage').innerHTML += html;
 	    		id('stage').innerHTML = html + id('stage').innerHTML;
 	    	}
 
@@ -371,14 +371,14 @@ function chatline(data,event) {
 	id('userID').value = '';
 	id('photo').value = '';
 
-	//画像　download 
+	//画像　download
 	var imgs = document.getElementsByClassName('photoFrame');
 	imgDownload(imgs);
 }
 
 //download image
 function imgDownload(imgs) {
-	
+
 	//console.log(imgs.length);
 	for(var i=0,n=imgs.length; i<n; i++) {
 		imgs[i].addEventListener('click', function() {
@@ -409,13 +409,13 @@ function chatRemove(num) {
 			socket.emit('chat remove', {id: chatRemoveId[1]});
 		}
 	}
-	
+
 	/*
 	触れた要素のid,classを取得
 	取得idをsocket.emitする
 	サーバーで削除操作する　idをmongodbに通知、コールバックでsodket.emitする。
 	サーバーから受けたデータを元に削除する。
-	
+
 	一番早いのはクライアントで削除をして、サーバーで削除操作、確認をする。
 	削除できないときだけ通知をクライアントに送り、クライアントでは未削除理由とチャットの復活作業をす
 	復活作業はmongoのコールバックで条件分岐して返す。

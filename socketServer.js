@@ -35,6 +35,8 @@ exports.listen = function(server) {
       if(data.load == 'start') {
 
         Chat.where().limit(100).exec(function(err, data) {
+
+
           socket.emit('chat initial return', data);
        });
       }
@@ -72,6 +74,7 @@ exports.listen = function(server) {
 
     function sendChat() {
       Chat.find({}, function(err, data) {
+
         console.log('送信内容：',data);
         socket.emit('message send return', data);
         socket.broadcast.emit('message send return', data);
