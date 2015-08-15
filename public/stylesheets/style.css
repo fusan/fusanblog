@@ -3,6 +3,12 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
+@media screen and (max-width: 760px) {
+  body {
+    padding: 0;
+  }
+}
+
 a {
   color: #00B7FF;
 }
@@ -154,4 +160,3 @@ header button {
 	margin: 4px;
 	box-shadow: 0 0 1px gray;
 }
-
