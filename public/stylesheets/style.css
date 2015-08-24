@@ -160,3 +160,47 @@ header button {
 	margin: 4px;
 	box-shadow: 0 0 1px gray;
 }
+
+#agreement {
+  margin: 0;
+  padding: 0 0 0 0.5rem;
+  border-left: 0.5rem solid red;
+}
+#agreement > span {
+  display: inline-block;
+  margin: 0 1rem 0 0;
+}
+#agree {
+  margin-left: 0;
+}
+
+#stackedChart {
+  margin: 4px 4px 4px 0;
+  width: 50%;
+  height: 32px;
+  box-shadow: 0 0 2px gray;
+}
+
+#agreebar {
+  float: left;
+  height: 32px;
+  text-align: center;
+  line-height: 32px;
+  color: white;
+  background: rgb(252, 82, 82);
+}
+
+#disagreebar {
+  float: right;
+  height: 32px;
+  text-align: center;
+  line-height: 32px;
+  color: white;
+  background: rgb(23, 128, 204);
+}
+
+#pieChart {
+  position: relative;
+  width: 320px;
+  height: 320px;
+}

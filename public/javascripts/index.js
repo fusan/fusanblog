@@ -3,8 +3,8 @@
 ajax, view DOM, contoroller function
 */
 
-//var socket = io.connect('http://localhost:4000');
-var socket = io.connect('https://fusanblog.herokuapp.com');
+var socket = io.connect('http://localhost:4000');
+//var socket = io.connect('https://fusanblog.herokuapp.com');
 
 //ボタンと非同期通信お紐付け
 var buttons = document.getElementsByTagName('button');
@@ -36,9 +36,116 @@ function routing(selector) {
 		if(selector == 'upsert') { upsert(); }
 		if(selector == 'socket') { socketIo(); }
 		if(selector == 'bitcoin') { bitcoin(); }
+		if(selector == 'vote') { vote();}
 	});
 
 	},false);
+}
+
+//vote modele
+function vote() {
+	//push votes
+	var module = (function() {
+		this.addEventListener('click', function() {
+			var push = $.ajax({
+				type: 'GET',
+				url: '/vote/push',
+				data: {vote : this.id}
+			});
+
+			push.done(function(data) {
+				render(data.agree, data.disagree);
+				renderPie(data.agree, data.disagree);
+			});
+
+		}, false);
+	});
+
+	module.call(id('agree'));
+	module.call(id('disagree'));
+
+	//rendaring module
+	function render(agree, disagree) {
+		var total = agree + disagree;
+		var agreeRatio = (agree / total) * 100;
+		var disagreeRatio = (disagree / total) * 100;
+		var agreebar = document.getElementById('agreebar');
+		var disagreebar = document.getElementById('disagreebar');
+
+		agreebar.style.width = agreeRatio + '%';
+		disagreebar.style.width = disagreeRatio + '%';
+
+		agreebar.innerHTML = '良い' + agree;
+		disagreebar.innerHTML = 'うむ〜' + disagree;
+
+		console.log(total, agreeRatio, disagreeRatio);
+	}
+
+	function renderPie(agree, disagree) {
+		var list = [agree, disagree];
+		var pieChart = document.getElementById('pieChart');
+		var pieChartChild = pieChart.parentNode.children[3].firstChild;
+
+		if(pieChartChild) { pieChart.removeChild(pieChartChild);}
+
+		var svg = d3.select('#pieChart')
+								.append('svg')
+								.attr({
+									position: 'absolute',
+									top: 0,
+									left: 0,
+									width: parseInt(getComputedStyle(pieChart,'').width )+ 'px',
+									height: parseInt(getComputedStyle(pieChart,'').height) + 'px'
+								});
+
+		var pie = d3.layout.pie().value(function(d) {return d;});
+
+		var arc = d3.svg.arc().innerRadius(40).outerRadius(140);
+		var color = ['rgb(252, 82, 82)', 'rgb(23, 128, 204)'];
+
+		svg.selectAll('path')
+				.data(pie(list))
+				.enter()
+				.append('path')
+				.attr({
+					fill:function(d,i) {
+						return color[i];
+					},
+					'stroke': 'white',
+					'transform': 'translate(' + parseInt(getComputedStyle(pieChart,'').width ) / 2 + ',' + parseInt(getComputedStyle(pieChart,'').height) / 2 + ')'
+				})
+				.transition()
+				.duration(400)
+				.ease('ease')
+				.attrTween('d', function(d,i) {
+		      var interpolate = d3.interpolate(
+		        {startAngle: 0, endAngle: 0},
+		        {startAngle: d.startAngle, endAngle: d.endAngle}
+		        );
+
+		      return function(t) {
+		          return arc(interpolate(t));
+		        }
+		      });
+
+				svg.selectAll('text')
+					.data(list)
+					.enter()
+					.append('text')
+					.attr({
+						transform: function(d) {
+			        //console.log(arc.centroid(d));
+			        //textPositions.push(arc.centroid(d));
+			        return  'translate(' + arc.centroid(d) +')';
+			      },
+			      'font-size': '1rem',
+			      'text-anchor': 'middle',
+			      fill: 'black'
+					})
+					.text(function(d,i) {
+						return d;
+					});
+	}
 }
 
 //bitcoin test module

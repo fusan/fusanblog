@@ -26,7 +26,7 @@ exports.listen = function(server) {
       console.log(data);
 
       socket.emit('text return', data);
-      socket.broadcast.emit('text return', data); 
+      socket.broadcast.emit('text return', data);
     });
 
     //チャット履歴の読み込み
@@ -41,7 +41,7 @@ exports.listen = function(server) {
        });
       }
     });
-    
+
     //chat message
     socket.on('message send', function(data) {
       //console.log('chat',data);
@@ -67,7 +67,7 @@ exports.listen = function(server) {
           } else {
 
             sendChat();
-            socket.emit('db alert', {message : 'db arraive upper limit'}); 
+            socket.emit('db alert', {message : 'db arraive upper limit'});
           }
       });
     });

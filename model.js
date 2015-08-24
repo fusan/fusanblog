@@ -24,5 +24,11 @@ var SocketSchema = new mongoose.Schema({
 	'photo': Object
 }, {collection: 'chat'});
 
+var VoteSchema = new mongoose.Schema({
+	'vote': String,
+	'date': { type: Date, default: Date.now}
+},{collection: 'votes'})
+
 exports.User = db.model('User', UserSchema);
 exports.Chat = db.model('Chat', SocketSchema);
+exports.Vote = db.model('Vote', VoteSchema);

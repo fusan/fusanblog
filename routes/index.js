@@ -4,6 +4,7 @@ var fs = require('fs');
 
 var model = require('../model');
 	User = model.User;
+	Vote = model.Vote;
 
 var noodle = require('noodlejs');
 //console.log(noodle.query);
@@ -25,49 +26,100 @@ router.get('/', function(req, res, next) {
   for (var i=0,n=10000000;i<n|0;i = i+1) {
   	if(i === 0) {var start = new Date().getMilliseconds();}
   	sum += i;
-  	if(i === 9000000) { 
+  	if(i === 9000000) {
   		var end = new Date().getMilliseconds();
   		console.log(end,start,end - start);
   	}
   }
 });
 
+//stream api test
 router.get('/stream', function(req, res) {
 	//console.log(req.url.split('/')[1]);
-	
+
 	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
 	var html = '<h2>stream</h2>';
 
 	res.send({html: html, header: header,route: req.url.split('/')[1]});
 });
 
-router.get('/upsert', function(req,res) {
-	//console.log(req.url);
+//vote app
+router.get('/vote', function(req, res) {
+	//console.log(req.url.split('/')[1]);
 
 	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
-
-	var html = '<div>データベースに決算期と会社名があれば更新、なければデータ挿入する。<br>';
-		html += 'Yahooscrapingでは証券コード、決算期をチェックして更新があればインサートする感じで使えそう。<br>';
-		html += 'ただし、社名変更、M＆Aがあると新規でスクレイピングされることになる。';
-		html += '<ul>使ったquery<li>upsert</li><li>$and</li><li>$set</li></ul></div>';
-		html += '<div style="background: rgba(0,0,0,.08);">';
-		html += '<input type="text" name="settlement" value="" placeholder="2015" id="settlement">';
-		html += '<input type="text" name="company" value="" placeholder="TSLA" id="company">';
-		html += '<input type="text" name="sales" value="" placeholder="1000" id="sales">';
-		html += '<input type="button" name="submit" value="送信" id="insert"></div>';
-		html += '<div id="testFileld"></div>';
+	var html = '<h2>Vote</h2>' +
+							'<div id="agreement"><span>良かったですか？</span>' +
+							'<button id="agree">良かった</button><button id="disagree">良くなかった</button></div>' +
+							'<div id="stackedChart"><div id="agreebar"></div><div id="disagreebar"></div></div>' +
+							'<div id="pieChart"></div>';
 
 	res.send({html: html, header: header,route: req.url.split('/')[1]});
 });
 
-//noodlejsモジュールのテスト
+router.get('/vote/push', function(req, res) {
+	console.log(req.query);
+
+	var voteJson = {};
+	voteJson.vote = req.query.vote;
+
+	var vote = new Vote(voteJson);
+	vote.save(function(err) {
+		if(err) throw err;
+		Vote.find({}, function(err,data) {
+			if(err) throw err;
+			var votes = {};
+			var agrees = [],disagrees = [];
+
+			for (var i = 0,n = data.length; i < n; i++) {
+				if(data[i].vote === 'agree') {
+					agrees.push(data[i].vote);
+				} else {
+					disagrees.push(data[i].vote);
+				}
+			}
+
+			votes.agree = agrees.length;
+			votes.disagree = disagrees.length;
+
+			console.log(votes);
+			res.send(votes);
+		});
+	});
+	//database insert
+		//database find
+			//res.send vote data
+			//rendering to client side by d3.js or DOM + css
+});
+
+//mongodb upsert test
+router.get('/upsert', function(req,res) {
+	//console.log(req.url);
+	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
+
+	var html = '<div>データベースに決算期と会社名があれば更新、なければデータ挿入する。<br>' +
+					'Yahooscrapingでは証券コード、決算期をチェックして更新があればインサートする感じで使えそう。<br>' +
+					'ただし、社名変更、M＆Aがあると新規でスクレイピングされることになる。' +
+					'<ul>使ったquery<li>upsert</li><li>$and</li><li>$set</li></ul></div>' +
+					'<div style="background: rgba(0,0,0,.08);">' +
+					'<input type="text" name="settlement" value="" placeholder="2015" id="settlement">' +
+					'<input type="text" name="company" value="" placeholder="TSLA" id="company">' +
+					'<input type="text" name="sales" value="" placeholder="1000" id="sales">' +
+					'<input type="button" name="submit" value="送信" id="insert"></div>' +
+					'<div id="testFileld"></div>';
+
+	res.send({html: html, header: header, route: req.url.split('/')[1]});
+});
+
+//noodlejs module
 router.get('/scraping', function(req, res) {
 
-	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
-		header += '<div style="margin:.4rem .2rem;">URLを入力するとスクレイピング開始。module : noodle</div>';
-		header += '<div style="background: rgba(0,0,0,.08);margin:.4rem .2rem;">URL : http://www. <input type="text" name="scrape" id="scrapeURL"><button id="scrape">scrape</button></div>';
+	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>' +
+			'<div style="margin:.4rem .2rem;">URLを入力するとスクレイピング開始。module : noodle</div>' +
+			'<div style="background: rgba(0,0,0,.08);margin:.4rem .2rem;">URL : http://www. <input type="text" name="scrape" id="scrapeURL">' +
+			'<button id="scrape">scrape</button></div>';
 	var html = '';
-	
+
 	res.send({html: html, header: header,route: req.url.split('/')[1]});
 });
 
@@ -82,8 +134,9 @@ router.get('/scrape', function(req, res) {
 
 	noodle.query(query).then(function(results) {
 		var html = results.results[0].results[0];
-		var header = '<h4 id="viewHeaderTitle">'+ req.query.url +'</h4>';
-			header += '<div style="background: rgba(0,0,0,.08);margin:.4rem .2rem;">URL : http://www. <input type="text" name="scrape" id="scrapeURL"><button id="scrape">scrape</button></div>';
+		var header = '<h4 id="viewHeaderTitle">'+ req.query.url +'</h4>' +
+				'<div style="background: rgba(0,0,0,.08);margin:.4rem .2rem;">URL : http://www. <input type="text" name="scrape" id="scrapeURL">' +
+				'<button id="scrape">scrape</button></div>';
 
 		res.send({html: html, header: header,route: req.url.split('/')[1]});
 	});
@@ -94,21 +147,20 @@ router.get('/socket', function(req,res) {
 	//console.log(req.query)
 	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
 
-	var html = '<h4>Working Space</h4>';
-		html += '<!-- 位置情報ログ　--><div id="socketTestField"><div id="socketTestFieldInner"><span>２画面たちあげてください。broadcast</span><span id="dot"></span></div></div>';
-	    html += '<!-- chat line --><section id="chat"><div id="chatTimeLine">';
-	    html += '<button id="button">GPSデータ取得</button><input type="text" name="formTest" value="" placeholder="リアルタイムで反映" id="formTest">';
-	    
-	    html += '<div id="submit"><input type="text" name="userID" value="" placeholder="Chat ID" id="userID">';
-	    html += '<input type="text" name="message" value="" placeholder="コメント" id="message">';
-	    html += '<input type="file" accept="image/*" name="photo" id="photo" multiple>';
-	    html += '<button id="sendMessage">送信</button></div>';
-	    html += '<div id="stage"></section>';
+	var html = '<h4>Working Space</h4>' +
+			'<!-- 位置情報ログ　--><div id="socketTestField"><div id="socketTestFieldInner"><span>２画面たちあげてください。broadcast</span><span id="dot"></span></div></div>' +
+	    '<!-- chat line --><section id="chat"><div id="chatTimeLine">' +
+	    '<button id="button">GPSデータ取得</button><input type="text" name="formTest" value="" placeholder="リアルタイムで反映" id="formTest">' +
+	    '<div id="submit"><input type="text" name="userID" value="" placeholder="Chat ID" id="userID">' +
+	    '<input type="text" name="message" value="" placeholder="コメント" id="message">' +
+	    '<input type="file" accept="image/*" name="photo" id="photo" multiple>' +
+	    '<button id="sendMessage">送信</button></div>' +
+	    '<div id="stage"></section>';
 
 	    res.send({html: html, header: header,route: req.url.split('/')[1]});
 
 	    /*easyimage.resize({
-           src:'./public/images/IMG_0449.jpg', 
+           src:'./public/images/IMG_0449.jpg',
            dst:'./public/images/output/0449.jpg',
            width:500, height:500,
            cropwidth:128, cropheight:128,
@@ -153,9 +205,9 @@ router.get('/download/:id', function(req, res) {
 
 router.get('/bitcoin', function(req,res) {
 	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
-	var html = '<div><button id="getBitcoinData">データ取得</button></div>';
-		html += '<div id="bitcoinStage"></div>';
-		html += '<script src="http://cdn.pubnub.com/pubnub-3.7.12.min.js"></script>';
+	var html = '<div><button id="getBitcoinData">データ取得</button></div>' +
+			'<div id="bitcoinStage"></div>' +
+			'<script src="http://cdn.pubnub.com/pubnub-3.7.12.min.js"></script>';
 
 	res.send({html: html, header: header,route: req.url.split('/')[1]});
 });
