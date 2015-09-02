@@ -262,11 +262,10 @@ var socketIo = function() {
 	var field = id('testField');
 	var photoFile;
 
+	var geoLocationModule = (function(){/* geo location  */
+		id('geolocation').addEventListener('click', createMapTab, false);
 
-	/* geo location */
-	var geolocationModule = function(){
-
-		(function createMapTab() {
+		function createMapTab() {
 			var geolocation = $.ajax({
 					url: '/socket/geolocation',
 					type: 'GET'
@@ -276,9 +275,16 @@ var socketIo = function() {
 				field.innerHTML = data;
 				createGoogleMap();
 			});
-		}());
+		}
 
 		function createGoogleMap() {
+
+			//create google map
+			var map = new google.maps.Map(document.getElementById('googleMap'), {
+				center: {lat: 35.7033, lng: 139.5809},
+				zoom: 15
+			});
+
 			//get gps postion
 			id('getPosition').addEventListener('click', getGPS , false);
 
@@ -286,113 +292,93 @@ var socketIo = function() {
 				var count = 0;
 				var duration = 1000;
 
-			(function getPositionByTime() {
-					count++;
-					console.log(count);
-					navigator.geolocation.getCurrentPosition(successFunc, errFunc);
+				(function getPositionByTime() {
+					    count++;
+							console.log(count);
+					    navigator.geolocation.getCurrentPosition(successFunc, errFunc);
 
-					var timerID = setTimeout(getPositionByTime, duration);
+					    var timerID = setTimeout(getPositionByTime, duration);
 
-					function successFunc(position) {
-						var data = position.coords;
-						var geoData = [{latitude: data.latitude}, {logitude: data.longitude},{time: new Date()}];
+							function successFunc(position) {
+								var data = position.coords;
+								var geoData = [{latitude: data.latitude}, {logitude: data.longitude},{time: new Date()}];
+								socket.emit('server push', geoData);
+							}
 
-						socket.emit('server push', geoData);
-						socket.on('client push', function(data) {
-								var presentLocation = id('presentLocation');
+							function errFunc(error) {
+								//console.log(error);
+							}
 
-								field.style.boxShadow = '0 0 2px green';
+					    if(count == 20) {
+					      count = 0;
+					      clearTimeout(timerID);
+					    }
+					  }());
 
-								presentLocation.innerHTML  = '緯度：' + data[0].latitude; // prependの時に追加 + '<br>' + field.innerHTML;
-								//presentLocation.style.marginTop = '0.5rem';
-								//presentLocation.style.webkitTransition = '1.2s ease 0';
-
-								/* current positon marker
-								var latlng = new googele.maps.LatLng(data[0].latitude, data[0].longitude);
-								var marker = new googele.maps.Marker({
-									map: map,
-									postion: latlng
-								});*/
-							});
-					}
-
-					function errFunc(error) {
-						//console.log(error);
-					}
-
-					if(count == 20) {
-						count = 0;
-						clearTimeout(timerID);
-					}
-				}());
 			};
 
-			//create google map
-			var map = new google.maps.Map(document.getElementById('googleMap'), {
-				center: {lat: 35.7033, lng: 139.5809},
-				zoom: 15
-			});
-		}
-	};
+			//current positon from server
+			socket.on('client push', function(data) {
+					var presentLocation = id('presentLocation');
 
-	/* present text  */
-	var presentTextMoudule = function() {
+					field.style.boxShadow = '0 0 2px green';
 
-		(function presentTextTab(){
+					presentLocation.innerHTML  = '緯度：' + data[0].latitude; // prependの時に追加 + '<br>' + field.innerHTML;
+					//presentLocation.style.marginTop = '0.5rem';
+					//presentLocation.style.webkitTransition = '1.2s ease 0';
 
-			var realtimeInputText = $.ajax({
-					url: '/socket/realtimeInputText',
-					type: 'GET'
+					/* current positon marker
+					var latlng = new googele.maps.LatLng(data[0].latitude, data[0].longitude);
+					var marker = new googele.maps.Marker({
+						map: map,
+						postion: latlng
+					});*/
 				});
+		}
+	}());
+	/* form realtime exist  */
+	id('realtimeInputText').addEventListener('click', presentTextTab, false);
 
-			realtimeInputText.done(function(data) {
+	function presentTextTab(){
 
-				field.innerHTML = data;
-
-				id('formTest').addEventListener('keyup', emitFormText, false);
-
-				function emitFormText(){
-					var text = id('formTest').value;
-
-					socket.emit('text send', {textData: text});
-					socket.on('text return', function(data) {
-						field.style.boxShadow = '0 0 1px red';
-						id('textarea').innerHTML = data.textData;
-					});
-				}
+		var realtimeInputText = $.ajax({
+				url: '/socket/realtimeInputText',
+				type: 'GET'
 			});
-		}());
-	};
+
+		realtimeInputText.done(function(data) {
+
+			field.innerHTML = data;
+
+			id('formTest').addEventListener('keyup', function(){
+				var text = id('formTest').value;
+				socket.emit('text send', {textData: text});
+			},false);
+
+			socket.on('text return', function(data) {
+				field.style.boxShadow = '0 0 1px red';
+				id('textarea').innerHTML = data.textData;
+			});
+
+		});
+	}
 
 	/* mousemove event */
-	var ballModule = function(){
+	field.addEventListener('mousemove', function(e) {
+	  //console.log(e.pageX, e.pageY);
+	  socket.emit('mousemove', {
+	  	positionX : e.pageX - id('testField').offsetLeft -4,
+	  	positionY: e.pageY - id('testField').offsetTop -4
+	  });
+	},false);
 
-		field.innerHTML = '<div id="testFieldInner"><span id="dot"></span></div>';
+	socket.on('mousemove return', function(data) {
+			var dot = id('dot');
 
-		field.addEventListener('mousemove', moveBall, false);
-
-		function moveBall(e) {
-		  //console.log(e.pageX, e.pageY);
-		  socket.emit('mousemove', {
-		  	positionX : e.pageX - id('testField').offsetLeft -4,
-		  	positionY: e.pageY - id('testField').offsetTop -4
-		  });
-
-			socket.on('mousemove return', function(data) {
-					var dot = id('dot');
-
-					dot.style.position = 'relative';
-					dot.style.top = data.positionY + 'px';
-					dot.style.left = data.positionX + 'px';
-			});
-		}
-	};
-
-	var modules = [geolocationModule,presentTextMoudule, ballModule];
-
-	for(var i=0,n=modules.length; i<n;i++) {
-		document.querySelectorAll('.subModules')[i].addEventListener('click',modules[i], false);
-	}
+			dot.style.position = 'relative';
+			dot.style.top = data.positionY + 'px';
+			dot.style.left = data.positionX + 'px';
+	});
 
 	/* chat system */
 	id('sendMessage').addEventListener('click', function() {
@@ -413,7 +399,7 @@ var socketIo = function() {
 
 		//socketでクライアントへ送信
 		if(pushData.userID !== '' && pushData.message !== '') {
-			id('testField').innerHTML = '';
+			id('testFieldInner').innerHTML = '';
 			socket.emit('message send', pushData);
 		} else {
 			alert('must id & message!');
@@ -473,7 +459,7 @@ var socketIo = function() {
 //check before uploading image
 function imgThumnail(photo) {
 
-	id('testField').innerHTML = '';
+	id('testFieldInner').innerHTML = '';
 
 	var image = new Image();
 		image.src = photo;
@@ -483,8 +469,8 @@ function imgThumnail(photo) {
 
 	caution.appendChild(text);
 
-	id('testField').appendChild(image);
-	id('testField').appendChild(caution);
+	id('testFieldInner').appendChild(image);
+	id('testFieldInner').appendChild(caution);
 
 
 	var photoData = {};

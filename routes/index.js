@@ -49,7 +49,7 @@ router.get('/vote', function(req, res) {
 
 	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
 	var html = '<h2>Vote</h2>' +
-							'<div id="agreement"><span>良かったですか？</span>' +
+							'<div id="agreement"><span>雰囲気はいかがですか？</span>' +
 							'<button id="agree">良かった</button><button id="disagree">良くなかった</button></div>' +
 							'<div id="stackedChart"><div id="agreebar"></div><div id="disagreebar"></div></div>' +
 							'<div id="pieChart"></div>';
@@ -147,10 +147,10 @@ router.get('/socket', function(req,res) {
 	//console.log(req.query)
 	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
 
-	var html = '<h4>Working Space</h4>' +
-			'<!-- 位置情報ログ　--><div id="socketTestField"><div id="socketTestFieldInner"><span>２画面たちあげてください。broadcast</span><span id="dot"></span></div></div>' +
-	    '<!-- chat line --><section id="chat"><div id="chatTimeLine">' +
-	    '<button id="button">GPSデータ取得</button><input type="text" name="formTest" value="" placeholder="リアルタイムで反映" id="formTest">' +
+	var html = '<button class="subModules">Map</button><button class="subModules">Text</button><button class="subModules">Ball</button>' +
+			'<span style="float:right;">２画面たちあげてください。</span>' +
+			'<div id="testField"></div>' +
+			'<section id="chat"><div id="chatTimeLine">' +
 	    '<div id="submit"><input type="text" name="userID" value="" placeholder="Chat ID" id="userID">' +
 	    '<input type="text" name="message" value="" placeholder="コメント" id="message">' +
 	    '<input type="file" accept="image/*" name="photo" id="photo" multiple>' +
@@ -172,7 +172,18 @@ router.get('/socket', function(req,res) {
                   console.log(err);
                 }
               );*/
+});
 
+router.get('/socket/geolocation', function(req,res) {
+	var html = '<button id="getPosition">GPSデータ取得</button>現在地: <span id="presentLocation"></span>' +
+						'<div id="googleMap"></div>';
+	res.send(html);
+});
+
+router.get('/socket/realtimeInputText', function(req,res) {
+	var html = '<input type="text" name="formTest" value="" placeholder="リアルタイムで反映" id="formTest">' +
+						'<div id="textarea"></div>';
+	res.send(html);
 });
 
 //年度データがなければ丸ごと挿入、修正値があれば修正値のみ変更　upsertの威力

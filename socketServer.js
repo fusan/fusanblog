@@ -16,7 +16,7 @@ exports.listen = function(server) {
     });
 
     socket.on('server push', function(data) {
-        //console.log(data);
+        console.log(data);
         socket.emit('client push', data);
         socket.broadcast.emit('client push', data);
     });
