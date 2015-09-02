@@ -3,9 +3,9 @@
 ajax, view DOM, contoroller function
 */
 
-var socket = io.connect('http://localhost:4000');
+//var socket = io.connect('http://localhost:4000');
 //model.js も変更
-//var socket = io.connect('https://fusanblog.herokuapp.com');
+var socket = io.connect('https://fusanblog.herokuapp.com');
 
 //ボタンと非同期通信お紐付け
 var buttons = document.getElementsByTagName('button');
