@@ -1,8 +1,9 @@
 var mongoose = require('mongoose');
 
-var url = 'mongodb://heroku_99cv7jnx:urpqu046rhf5v623i3ckma1d35@ds047612.mongolab.com:47612/heroku_99cv7jnx/blog';
+//var url = 'mongodb://heroku_99cv7jnx:urpqu046rhf5v623i3ckma1d35@ds047612.mongolab.com:47612/heroku_99cv7jnx/blog';
 //public/javascripts/index.js も変更
 //var url = 'mongodb://localhost/blog';
+var url = 'mongodb://dbuser:password@54.92.9.226/fusanblog';
 
 var db = mongoose.createConnection(url, function(err, res) {
 	if(err) {

@@ -3,8 +3,9 @@
 ajax, view DOM, contoroller function
 */
 /* ------------------- global value --------------- */
-//var socket = io.connect('http://localhost:4000');
-var socket = io.connect('https://fusanblog.herokuapp.com');
+//var socket = io.connect('http://localhost:3000');
+//var socket = io.connect('https://fusanblog.herokuapp.com'); //heroku 用
+var socket = io.connect('http://54.92.9.226:3000'); //aws 用
 //model.js も変更
 var modal = modal;
 
