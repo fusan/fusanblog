@@ -51,7 +51,7 @@ router.get('/vote', function(req, res) {
 	var html = '<h2>Vote</h2>' +
 							'<div id="agreement"><span>雰囲気はいかがですか？</span>' +
 							'<button id="agree">良かった</button><button id="disagree">良くなかった</button></div>' +
-							'<div id="stackedChart"><div id="agreebar"></div><div id="disagreebar"></div></div>' +
+							'<div class="stackedChart"><div id="agreebar"></div><div id="disagreebar"></div></div>' +
 							'<div id="pieChart"></div>';
 
 	res.send({html: html, header: header,route: req.url.split('/')[1]});
@@ -147,14 +147,11 @@ router.get('/socket', function(req,res) {
 	//console.log(req.query)
 	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
 
-	var html = '<button class="subModules">Map</button><button class="subModules">Text</button><button class="subModules">Ball</button>' +
+	var html = '<button class="subModules">Map</button><button class="subModules">Text</button>' +
+			'<button class="subModules">Ball</button>' +
 			'<span style="float:right;">２画面たちあげてください。</span>' +
 			'<div id="testField"></div>' +
-			'<section id="chat"><div id="chatTimeLine">' +
-	    '<div id="submit"><input type="text" name="userID" value="" placeholder="Chat ID" id="userID">' +
-	    '<input type="text" name="message" value="" placeholder="コメント" id="message">' +
-	    '<input type="file" accept="image/*" name="photo" id="photo" multiple>' +
-	    '<button id="sendMessage">送信</button></div>' +
+			'<section id="chat"><div id="chatTimeLine"><div id="submit"><div id="messageCard">+</div></div></div>' +
 	    '<div id="stage"></section>';
 
 	    res.send({html: html, header: header,route: req.url.split('/')[1]});
@@ -175,8 +172,10 @@ router.get('/socket', function(req,res) {
 });
 
 router.get('/socket/geolocation', function(req,res) {
-	var html = '<button id="getPosition">GPSデータ取得</button>現在地: <span id="presentLocation"></span>' +
-						'<div id="googleMap"></div>';
+	var html = '<div id="googleMap"></div>' +
+						'<div id="infomation"><div><img src="/images/icon_cone.svg" id="getRoot" title="ルートロギング">' +
+						'<img src="/images/icon_pin.svg" id="getPosition" title="訪問先マッピング"></div>' +
+						'<span id="presentLocation"></span></div>';
 	res.send(html);
 });
 
@@ -240,21 +239,4 @@ router.get('/getBitcoinData', function(req, res) {
 	});
 });
 
-
-
-/*
-	目的：①エンジニア仲間を増やしてそこから仕事を取る、一緒に仕事をする
-			②直接クライアントをとる。
-
-	/postform blogFormat.ejs　記入用のフォーム モーダルウィンドウ
-	/post mongodb　にデータを格納する　
-	/list mongodb からブログリストを検索 index.ejs に変数を返し #list　に挿入　
-	/blog #list の　日付の記事を読みだし画面遷移する
-
-	/work 製作アプリのヘッドラインを回収　ajax
-	<header></header>
-	<section id="work">カードスタイルで表示：スマホ対応なので横にスワイプする：カードエフェクトを加える</section>
-	<section id="bloglist"><h3>ブログのヘッド</h3><span>とざっくり見出し</span></section>
-	<section id="blog"><span>ここから完全にblogページに遷移する</span>#bloglistをクリックするとこのフィールドに反映/section>
-*/
 module.exports = router;

@@ -12,6 +12,7 @@ var http = require('http');
 
 var model  = require('../model.js');
   Chat = model.Chat;
+  Marker = model.Marker;
 
 /**
  * Get port from environment and store in Express.

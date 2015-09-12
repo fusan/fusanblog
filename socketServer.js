@@ -8,6 +8,53 @@ exports.listen = function(server) {
   io.on('connection', function (socket) {
     console.log('index connected');
 
+    socket.on('init pin', function (data) {
+
+      Marker.find({}, function(err, data) {
+        console.log(data);
+        socket.emit('init pin return', data);
+      });
+      
+    });
+
+    //create marker  / save database
+    socket.on('new marker send', function(data) {
+      //データベースに格納する際にナンバリングする。
+      //promise で格納後クライアントにemitする。
+      //下のidプロパティーは擬似できなもの。
+      data.id = Math.floor(Math.random() * 1000);
+      data.latitude = data.geoData.latitude;
+      data.longitude = data.geoData.longitude;
+
+      var marker = new Marker(data);
+
+      marker.save(function(err) {
+        if(err) throw err;
+        //console.log(data.id);
+
+        Marker.find({}, function(err, data) {
+          console.log(data);
+          socket.emit('new marker return',data);
+          socket.broadcast.emit('new marker return',data);
+        });
+      });
+    });
+
+    //remove marker / remove to Merker model
+    socket.on('remove marker', function (data) {
+      //console.log('remove retun',data);
+
+      Marker.remove({_id: data}, function(err) {
+        if(err) throw err;
+
+        Marker.find({}, function(err, data) {
+          socket.emit('remove marker return', data);
+          socket.broadcast.emit('remove marker return', data);
+          //reload 処理を書く
+        });
+      });
+    })
+
     //mouseposition realtime
     socket.on('mousemove', function(data) {
       //console.log(data);
@@ -17,6 +64,7 @@ exports.listen = function(server) {
 
     socket.on('server push', function(data) {
         console.log(data);
+
         socket.emit('client push', data);
         socket.broadcast.emit('client push', data);
     });
@@ -33,10 +81,7 @@ exports.listen = function(server) {
     socket.on('chat initial send' ,function(data) {
 
       if(data.load == 'start') {
-
         Chat.where().limit(100).exec(function(err, data) {
-
-
           socket.emit('chat initial return', data);
        });
       }
@@ -82,14 +127,17 @@ exports.listen = function(server) {
     }
 
     //chat remove
-    socket.on('chat remove', function(data) {
+    socket.on('chat remove', function(id) {
       //console.log(data);
-      Chat.remove({_id: data.id}, function(err) {
+      Chat.remove({_id: id}, function(err) {
         if(err) throw err;
-        console.log('remove collection',data);
-        Chat.find({}, function(err, data) {
-          socket.emit('chat remove return',data);
-          socket.broadcast.emit('chat remove return',data);
+
+        Chat.find({_id: id}, function(err, data) {
+          //console.log(data.length === 0);
+          if(data.length === 0) {
+            socket.emit('chat remove return',id);
+            socket.broadcast.emit('chat remove return',id);
+          }
         });
       });
     });

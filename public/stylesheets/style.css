@@ -3,17 +3,12 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
-@media screen and (max-width: 760px) {
-  body {
-    padding: 0;
-  }
-}
-
 a {
   color: #00B7FF;
 }
 
 header {
+  position: relative;
 	background: rgba(0,0,0,.04);
 }
 
@@ -24,6 +19,29 @@ header button {
 	height: auto;
 }
 
+#modal {
+  position: fixed;
+  bottom: 0;
+  margin: 0 0 0 -58px; /* body padding 50px body margin 8px*/
+  padding: 0;
+  height: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+#modal > div {
+  margin: 5% auto;
+  padding: 0;
+  width: 80%;
+  height: 80%;
+  background: white;
+  box-shadow: rgba(255, 255, 255, 0.5);
+}
+
+#modal > div > *{
+  margin: 1%;
+}
+
 #viewArea {
 	margin: 0;
 	padding: 0;
@@ -31,7 +49,7 @@ header button {
 	width: 99%;
 }
 
-#viewHeader,#submit {
+#viewHeader {
 	margin: 0;
 	padding: 0;
 	height: auto;
@@ -39,11 +57,6 @@ header button {
 	color: white;
 	background: rgba(0,0,0,.64);
 	box-shadow: 0 0 2px gray;
-}
-
-#submit > * {
-	margin: .4rem;
-	height: 100%;
 }
 
 #viewHeaderTitle {
@@ -59,6 +72,7 @@ header button {
 }
 
 #dot {
+  position: absolute;
 	display: block;
 	width: 8px;
 	height: 8px;
@@ -66,7 +80,22 @@ header button {
 	background: red;
 }
 
+#lineX {
+  position: absolute;
+  width: 100%;
+  font-size: 0.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.32);
+}
+
+#lineY {
+  position: absolute;
+  height: 100%;
+  font-size: 0.5rem;
+  border-left: 1px solid rgba(0, 0, 0, 0.32);
+}
+
 #testField {
+  position: relative;
   margin: 0.2rem 0 0 0;
 	width: 100%;
 	height: 300px;
@@ -78,21 +107,26 @@ header button {
 	width: 300px;
 	height: auto;
 }
+
 #chat {
+  margin: 0;
 	width: 100%;
+  height: auto;
 }
 
 #chatTimeLine {
 	float: left;
-	margin: 2% 0 0 0;
-	width: 100%;
+	margin: 0;
+  width: 100%;
 }
 
 #stage {
 	overflow: scroll;
 	float: left;
+  margin: 0;
 	width: 100%;
 	height: 300px;
+  box-shadow: 0 0 1px gray;
 }
 
 #stage > div > span {
@@ -109,9 +143,54 @@ header button {
 	box-shadow: 0 0 1px gray;
 }
 
+#submit {
+	margin:0;
+	padding: 0;
+	width: auto;
+  height: 2rem;
+	color: white;
+	background: rgba(0,0,0,.64);
+}
+
+#submit > #messageCard {
+  margin:0;
+  padding: 0;
+  width: 2rem;
+  height: inherit;
+  line-height: 2rem;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* ------- geolocation module -------- */
 #googleMap {
-  width: 100%;
+  float: left;
+  margin: 0;
+  padding: 0;
+  width: 70%;
   height: 100%;
+}
+
+#infomation {
+  float: right;
+  margin: 0;
+  padding: 0;
+  width: 30%;
+  height: 100%;
+  overflow: scroll;
+}
+
+#infomation > * {
+  margin: 2%;
+}
+
+#infomation > div {
+  height: 15%;
+  background: rgb(128, 128, 128);
+}
+
+#infomation img   {
+  margin: .5rem;
 }
 
 .subModules {
@@ -124,6 +203,9 @@ header button {
 #presentLocation {
   margin-top: 0;
   display: inline-block;
+  width: 96%;
+  height: auto;
+  background: rgb(223, 223, 218);
 }
 
 /* chat */
@@ -151,7 +233,7 @@ header button {
 	height: auto;
 }
 
-.chatRemove {
+.removeChat {
 	color: red;
 	font-weight: bold;
 }
@@ -179,6 +261,12 @@ header button {
 	box-shadow: 0 0 1px gray;
 }
 
+#messageCard {
+  position: relative;
+  line-height: 100%;
+  color: white;
+}
+
 #agreement {
   margin: 0;
   padding: 0;
@@ -186,21 +274,20 @@ header button {
 #agreement > span {
   display: inline-block;
   margin: 0 1rem 0 0;
-  text-shadow: 1px 1px 0px gray;
+  text-shadow: 0.05rem 0.05rem 0px rgb(235, 235, 235);
 }
 #agreement > span:first-letter {
   margin: 0 0.1rem 0 0;
   color: red;
-  font-size: 1.1rem;
-  font-weight: bold;
+  font-size: 1rem;
 }
 #agree {
   margin-left: 0;
 }
 
-#stackedChart {
+.stackedChart {
   margin: 4px 4px 4px 0;
-  width: 50%;
+  width: 40%;
   height: 32px;
   box-shadow: 0 0 2px gray;
 }
@@ -231,4 +318,29 @@ header button {
   position: relative;
   width: 320px;
   height: 320px;
+}
+
+
+@media screen and (max-width: 760px) {
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  #modal {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    margin:0; /* body padding 50px body margin 8px*/
+    width: 100%;
+  }
+
+  #modal > div {
+    margin: 5% auto;
+    padding: 0;
+    width: 90%;
+    height: 90%;
+    background: white;
+    box-shadow: rgba(255, 255, 255, 0.5);
+  }
 }

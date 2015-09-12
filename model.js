@@ -28,8 +28,17 @@ var SocketSchema = new mongoose.Schema({
 var VoteSchema = new mongoose.Schema({
 	'vote': String,
 	'date': { type: Date, default: Date.now}
-},{collection: 'votes'})
+},{collection: 'votes'});
+
+var MarkerSchema = new mongoose.Schema({
+	'id': String,
+	'date': { type: Date, default: Date.now},
+	'latitude': Number,
+	'longitude': Number,
+	'comment': String
+},{collection: 'marker'});
 
 exports.User = db.model('User', UserSchema);
 exports.Chat = db.model('Chat', SocketSchema);
 exports.Vote = db.model('Vote', VoteSchema);
+exports.Marker = db.model('Marker', MarkerSchema);
