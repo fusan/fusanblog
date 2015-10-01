@@ -13,8 +13,9 @@ exports.listen = function(server) {
       Marker.find({}, function(err, data) {
         console.log(data);
         socket.emit('init pin return', data);
+        socket.broadcast.emit('init pin return', data);
       });
-      
+
     });
 
     //create marker  / save database
@@ -83,6 +84,7 @@ exports.listen = function(server) {
       if(data.load == 'start') {
         Chat.where().limit(100).exec(function(err, data) {
           socket.emit('chat initial return', data);
+          socket.broadcast.emit('chat initial return', data);
        });
       }
     });

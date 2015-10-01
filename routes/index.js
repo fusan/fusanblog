@@ -146,9 +146,9 @@ router.get('/scrape', function(req, res) {
 router.get('/socket', function(req,res) {
 	//console.log(req.query)
 	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
-
-	var html = '<button class="subModules">Map</button><button class="subModules">Text</button>' +
-			'<button class="subModules">Ball</button>' +
+	
+	var html = '<button class="subModules" id="geolocationModule">Map</button><button class="subModules" id="presentTextMoudule">Text</button>' +
+			'<button class="subModules" id="ballModule">Ball</button>' +
 			'<span style="float:right;">２画面たちあげてください。</span>' +
 			'<div id="testField"></div>' +
 			'<section id="chat"><div id="chatTimeLine"><div id="submit"><div id="messageCard">+</div></div></div>' +

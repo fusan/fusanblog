@@ -2,10 +2,30 @@
 フロントエンドのコントロールはすべてまかなえる。
 ajax, view DOM, contoroller function
 */
+/* ------------------- judge userAgent --------------- */
+//https://w3g.jp/blog/js_browser_sniffing2015
+var _ua = (function(u){
+  return {
+    Tablet:(u.indexOf("windows") != -1 && u.indexOf("touch") != -1)
+      || u.indexOf("ipad") != -1
+      || (u.indexOf("android") != -1 && u.indexOf("mobile") == -1)
+      || (u.indexOf("firefox") != -1 && u.indexOf("tablet") != -1)
+      || u.indexOf("kindle") != -1
+      || u.indexOf("silk") != -1
+      || u.indexOf("playbook") != -1,
+    Mobile:(u.indexOf("windows") != -1 && u.indexOf("phone") != -1)
+      || u.indexOf("iphone") != -1
+      || u.indexOf("ipod") != -1
+      || (u.indexOf("android") != -1 && u.indexOf("mobile") != -1)
+      || (u.indexOf("firefox") != -1 && u.indexOf("mobile") != -1)
+      || u.indexOf("blackberry") != -1
+  }
+})(window.navigator.userAgent.toLowerCase());
+
 /* ------------------- global value --------------- */
-//var socket = io.connect('http://localhost:3000');
-//var socket = io.connect('https://fusanblog.herokuapp.com'); //heroku 用
-var socket = io.connect('http://54.92.9.226:3000'); //aws 用
+var socket = io.connect('http://localhost:3000');
+var socket = io.connect('https://fusanblog.herokuapp.com'); //heroku 用
+//var socket = io.connect('http://54.92.9.226:3000'); //aws 用
 //model.js も変更
 var modal = modal;
 
@@ -16,36 +36,57 @@ function id (selector) {
 /* --------  powindow global module  ------------- */
 //buttonとpanel を引数で渡し,内部で紐づける。
 //type引数を与えてスライド、フェイドなどアクションを帰る。
-var popWindow = function(button, panel, panelInnerHtml) {
+var popWindow = function(button, panel, panelInnerHtml, type) {
 	button.parentNode.appendChild(panel); //親ノードに配置する場合。
 	//button.appendChild(panel); //buttonの直下に配置する場合。
-
 	panel.innerHTML = panelInnerHtml;
-	//panel.style.marginLeft = '0px';
+
 	panel.style.position = 'absolute';
-	panel.style.width = '0px';
 	panel.style.height = '0px';
+
+	if(type === 'show') {
+		panel.style.width = '0px';
+	} else if(type === 'slide') {
+		panel.style.width = '300px';
+	} else {
+		panel.style.width = '300px';
+	}
+
 	panel.style.background = 'gray';
 	panel.style.overflow = 'hidden';
 	panel.style.webkitTransition = '0.2s ease 0';
 
-	button.addEventListener('click', popup, false);
+	if(_ua.Mobile || _ua.Tablet) {
+		button.addEventListener('touchstart', popup, false);
+	} else {
+		button.addEventListener('click', popup, false);
+	}
 
 	function popup(e) {
 		e.stopPropagation();
 		if(panel.offsetHeight === 0) {
 			panel.style.height = '200px';
 			panel.style.width = '300px';
+			if(type === 'fadeIn') {
+				panel.style.opacity = '1';
+			}
 		} else {
 			panel.style.height = '0px';
-			panel.style.width = '0px';
+			if(type === 'show') {
+				panel.style.width = '0px';
+			} else if(type === 'slide') {
+				panel.style.width = '300px';
+			} else if(type === 'fadeIn') {
+				panel.style.width = '300px';
+				panel.style.opacity = '0';
+			}
 		}
 	}
 };
 
-/* -------------------- guide bar -----------------*/
+/* ----------- guide bar module -----------------*/
 //menuのdivとmenuの次にnaviBarのdivを設置
-var navigationBar = (function(parent,naviBar) {
+var navigationBar = function(parent,naviBar) {
 
 	var menu = parent;
 	var tab = menu.children;
@@ -88,18 +129,15 @@ var navigationBar = (function(parent,naviBar) {
 		//for分の中で関数を生成すると参照に行ってしまう。
 		//console.log(tab[i].offsetLeft,tab[i].offsetWidth,tab[i].getAttribute('id'));
 	}
-
-}(document.getElementById('header'),document.getElementById('naviBar')));
+//navigationBar end
+}(document.getElementById('header'),document.getElementById('naviBar'));
 
 /* -------------- contoroler module --------------- */
 //子モジュールはボタンごとに紐付け。
-//子モジュールは更に孫関数や孫モジュールを持つ
-var routing = (function(buttons) {
+var routing = function(buttons) {
 
 	var createRouter = function (selector) {
-
 		id(selector).addEventListener('click',connection ,false);
-
 		function connection() {
 			//console.log('/' + selector);
 			var view = $.ajax({
@@ -125,11 +163,10 @@ var routing = (function(buttons) {
 	};
 
 	for(var i=0,n=buttons.length;i<n;i++) {
-		//console.log(buttons[i].getAttribute('id'));
 		createRouter(buttons[i].getAttribute('id'));
 	}
-
-}(document.getElementsByTagName('button')));
+//routind end
+}(document.getElementsByTagName('button'));
 
 /* -------------- vote page module ----------------------*/
 var vote = function() {
@@ -137,7 +174,7 @@ var vote = function() {
 	var module = function() {
 		//click event
 		this.addEventListener('click', function() {
-			console.log(this);
+			//console.log(this);
 			var push = $.ajax({
 				type: 'GET',
 				url: '/vote/push',
@@ -163,30 +200,15 @@ var vote = function() {
 		var disagreeRatio = (disagree / total) * 100;
 		var agreebar = document.getElementById('agreebar');
 		var disagreebar = document.getElementById('disagreebar');
-		//element を　毎度生成する。
 
-		/*
-		console.log(agreebar, disagreebar);
-		var stackedChart = document.getElementById('stackedChart');
-		console.log(stackedChart.children);
-		var agreebar  = document.createElement('div');
-				agreebar.setAttribute('id','agreebar');
-		var disagreebar = document.createElement('div');
-				disagreebar.setAttribute('id', 'disagreebar');
-		console.log(agreebar, disagreebar);
+		agreebar.style.width = agreeRatio + '%';
+		disagreebar.style.width = disagreeRatio + '%';
 
-		stackedChart.appendChild(agreebar);
-		stackedChart.appendChild(disagreebar);
-		*/
+		agreebar.innerHTML = '良い' + agree;
+		disagreebar.innerHTML = 'うむ〜' + disagree;
 
-	agreebar.style.width = agreeRatio + '%';
-	disagreebar.style.width = disagreeRatio + '%';
-
-	agreebar.innerHTML = '良い' + agree;
-	disagreebar.innerHTML = 'うむ〜' + disagree;
-
-	console.log(total, agreeRatio, disagreeRatio);
-};
+		//console.log(total, agreeRatio, disagreeRatio);
+	};
 
 	//render pie chart by D3
 	module.renderPie = function(agree, disagree) {
@@ -254,14 +276,15 @@ var vote = function() {
 				return d;
 			});
 		};
+//vote end
 };
-
 /* --------------- socket test module -------------------- */
 var socketIo = function() {
+	var module = {};
+			module.field = id('testField');
 
-	var field = id('testField');
-	//geo location
-	var geolocationModule = function() {
+	/* ================= geo location ================= */
+	module.geolocationModule = function geolocationModule() {
 		var createMapTab = function () {
 			var geolocation = $.ajax({
 					url: '/socket/geolocation',
@@ -269,13 +292,13 @@ var socketIo = function() {
 				});
 
 			geolocation.done(function(data){
-				console.log(data);
-				field.innerHTML = data;
+				//console.log(data);
+				module.field.innerHTML = data;
 				createGoogleMap();
 			});
 		}();
 
-		var createGoogleMap = function() {
+		var createGoogleMap = function createGoogleMap() {
 			//get gps postion
 			id('getRoot').addEventListener('click', getRoot, false);
 			id('getPosition').addEventListener('click', getPosition,  false);
@@ -339,12 +362,12 @@ var socketIo = function() {
 
 					target.addEventListener('click', function() {
 						var id = target.getAttribute('id');
-						console.log(id);
+						//console.log(id);
 
 						socket.emit('remove marker', id );
 						socket.on('remove marker return', function(data) {
 
-							console.log('json after remove >', data);
+							//console.log('json after remove >', data);
 
 							presentLocation.innerHTML = setMarkerContents(data);
 							setMarker(data);
@@ -362,7 +385,7 @@ var socketIo = function() {
 				socket.on('new marker return', function(data) {
 
 					//create marker
-					console.log('json after inport >', data, data.length);
+					//console.log('json after inport >', data, data.length);
 
 					presentLocation.innerHTML = setMarkerContents(data);
 					setMarker(data);
@@ -392,12 +415,12 @@ var socketIo = function() {
 
 							socket.emit('server push', geoData);
 							socket.on('client push', function(data) {
-								console.log(data);
-								field.style.boxShadow = '0 0 2px green';
+								//console.log(data);
+								module.field.style.boxShadow = '0 0 2px green';
 
 								presentLocation.innerHTML  = '緯度：' + data.latitude + '<br>' +
 																							'経度：' + data.longitude + '<br>' +
-																							'取得時刻：' + data.time; // prependの時に追加 + '<br>' + field.innerHTML;
+																							'取得時刻：' + data.time; // prependの時に追加 + '<br>' + module.field.innerHTML;
 
 							});
 						}
@@ -480,15 +503,14 @@ var socketIo = function() {
 				      err_msg = "タイムアウトしました";
 				      break;
 				  }
-					console.log(err_msg);
+					//console.log(err_msg);
 				}
-
 			}
 		};
+	//geolocationModule
 	};
-
-	/* present text  */
-	var presentTextMoudule = function() {
+	/* ================= present text ================= */
+	module.presentTextMoudule = function presentTextMoudule() {
 
 		(function presentTextTab(){
 
@@ -499,31 +521,33 @@ var socketIo = function() {
 
 			realtimeInputText.done(function(data) {
 
-				field.innerHTML = data;
+				module.field.innerHTML = data;
 
-				id('formTest').addEventListener('keyup', emitFormText, false);
+				id('formTest').addEventListener('keyup', realtimeText, false);
 
-				function emitFormText(){
+				function realtimeText(){
 					var text = id('formTest').value;
 
 					socket.emit('text send', {textData: text});
 					socket.on('text return', function(data) {
-						field.style.boxShadow = '0 0 1px red';
+						module.field.style.boxShadow = '0 0 1px red';
 						id('textarea').innerHTML = data.textData;
 					});
 				}
 			});
 		}());
+	//presentTextMoudule
 	};
+	/* ================= mousemove event ================= */
+	module.ballModule = function ballModule() {
 
-	/* mousemove event */
-	var ballModule = function() {
+		module.field.innerHTML = '<div id="lineX"></div><div id="lineY"></div><span id="dot"></span>';
 
-		field.innerHTML = '<div id="lineX"></div><div id="lineY"></div><span id="dot"></span>';
-
-		field.addEventListener('mousemove', moveBall, false);
+		module.field.addEventListener('mousemove', moveBall, false);
 
 		function moveBall(e) {
+			e.stopPropagation();
+			e.preventDefault();
 		  //console.log(e.pageX, e.pageY);
 		  socket.emit('mousemove', {
 		  	positionX : e.pageX - id('testField').offsetLeft -4,
@@ -545,147 +569,170 @@ var socketIo = function() {
 					lineY.innerHTML = data.positionX + dot.offsetWidth / 2 + 'px';
 			});
 		}
+	//ballModule
 	};
+	/* ================= routing  ================= */
+	module.routing = function routing() {
+		var flag;
+		var modules = [module.geolocationModule, module.presentTextMoudule, module.ballModule];
 
-	var modules = [geolocationModule,presentTextMoudule, ballModule];
+		//ボタンとページの紐付け
+		function createSubRouter(button,page) {
+			//console.log(button, page);
+			button.addEventListener('click',function() {
 
-	for(var i=0,n=modules.length; i<n;i++) {
-		document.querySelectorAll('.subModules')[i].addEventListener('click',modules[i], false);
-	}
+				if( button.getAttribute('id') === page.name ) {
+					flag = true;
+					page();
+				} else {
+					flag = false;
+				}
 
-	/* chat module */
-	var chatModule = function() {
-		// 参考　http://www.html5.jp/canvas/ref/HTMLCanvasElement/toDataURL.html
+			}, false);
+		}
+
+		for(var i=0,n=modules.length; i<n;i++) {
+			createSubRouter(document.querySelectorAll('.subModules')[i], modules[i]);
+		}
+	//routing
+	}();
+	/* ================= chat module ================= */
+	module.chatModule = function chatModule() {
+		// http://www.html5.jp/canvas/ref/HTMLCanvasElement/toDataURL.html
 		var photoFile;
-		var chat = function() {
 
+		var chat = function chat() {
 			//chat line initialize
-			socket.emit('chat initial send', {load: 'start'});
-			socket.on('chat initial return', function(data) {
-				chatline(data);
-			});
+			var initialize = function initialize() {
+				socket.emit('chat initial send', {load: 'start'});
+				socket.on('chat initial return', function(data) {
+					chatline(data);
+				});
 
-			//表示上限アラート
-			socket.on('db alert', function(data) {
-				alert(data.message);
-			});
+				//表示上限アラート
+				socket.on('db alert', function(data) {
+					alert(data.message);
+				});
+			//initialize
+			}();
 
+			//add chat
+			var addChat = function addChat() {
 
-			var panelInnerHtml = '<input type="text" name="userID" value="" placeholder="Chat ID" id="userID">' +
-												'<input type="text" name="message" value="" placeholder="コメント" id="message">' +
-												'<input type="file" accept="image/*" name="photo" id="photo" multiple>' +
-												'<button id="sendMessage">送信</button>';
+				var button = id('messageCard');
+				var popup = document.createElement('div');
+				var html = '<input type="text" name="userID" value="" placeholder="Chat ID" id="userID">'
+													 + '<input type="text" name="message" value="" placeholder="コメント" id="message">'
+													 + '<input type="file" accept="image/*" name="photo" id="photo" multiple>'
+													 + '<button id="sendMessage">送信</button>';
 
-			popWindow(id('messageCard'), document.createElement('div'),panelInnerHtml);
+				popWindow(button, popup, html, 'show');
+			//pushChat
+			}();
 
-			var reader = new FileReader();
+			//send chat
+			var pushChat = function pushChat() {
 
-			id('photo').addEventListener('change', file, false);
-			reader.addEventListener('load', fileCheck,false);
-
-			//generate file object
-			function file(e) {
-				var target = e.target;
-				var files = target.files;
-				//文字データにする
-				reader.readAsDataURL(files[0]);
-			}
-
-			//アップロード前のチェック
-			function fileCheck() {
-				photoFile =  imgThumnail(reader.result);
-			}
-
-			//check before uploading image
-			function imgThumnail(photo) {
-
-				id('testField').innerHTML = '';
-
-				var image = new Image();
-						image.src = photo;
-
-				var caution = document.createElement('span');
-						caution.textContent = 'よかったら送信ボタン押してね！';
-
-				id('testField').appendChild(image);
-				id('testField').appendChild(caution);
-
-				var photoData = {};
-						photoData.photo = photo;
-
-				//socketに渡す
-				image.onload = function() {
-					console.log('写真', this);
-					var ratio = 300 / this.naturalWidth;
-
-					photoData.width = this.width = this.naturalWidth * ratio;
-					photoData.height = this.height = this.naturalHeight * ratio;
-
-					this.addEventListener('click', function() {
-						var rad = 90;
-
-						$(this).css({
-							'-webkit-transform-origin': '50% 50%',
-							'-webkit-transform': 'rotate(0deg)'
-						}).animate({
-							'-webkit-transform-origin': '50% 50%',
-							'-webkit-transform': 'rotate(' + rad + 'deg)'
-						},500);
-
-					},false);
-				};
-
-				console.log(photoData);
-				return photoData;
-
-				/*
-				if(image.naturalWidth > 300) {
-					console.log('圧縮');
-					var ratio = 300 / image.naturalWidth;
-					photoData.width  = image.width = image.naturalWidth * ratio;
-					photoData.height = image.height = image.naturalHeight * ratio;
+				if(_ua.Mobile || _ua.Tablet) {
+					id('sendMessage').addEventListener('touchstart', push, false);
 				} else {
-					console.log('非圧縮');
-					photoData.width  = image.width = image.naturalWidth;
-					photoData.height = image.height = image.naturalHeight;
-				}
-				*/
-
-			}
-
-
-			id('sendMessage').addEventListener('click', sendMessage, false);
-
-			function sendMessage() {
-
-				var pushData = {};
-						pushData.pushTime = new Date();
-						pushData.userID = id('userID').value ||  '';
-						pushData.message = id('message').value || '';
-
-						if( photoFile !== '') { pushData.photo = photoFile; }
-
-				console.log(pushData);
-
-				if(pushData.userID !== '' && pushData.message !== '') {
-					id('testField').innerHTML = '';
-					socket.emit('message send', pushData);
-					socket.on('message send return', function(data) {
-						console.log('サーバーからのデータ',data);
-						chatline(data);
-					});
-				} else {
-					alert('must id & message!');
-					return;
+					id('sendMessage').addEventListener('click', push, false);
 				}
 
-				photoFile = '';
-			}
+				function push() {
+					var message = {};
+							message.pushTime = new Date();
+							message.userID = id('userID').value ||  '';
+							message.message = id('message').value || '';
+
+					if( photoFile !== '') { message.photo = photoFile; }
+
+					if(message.userID !== '' && message.message !== '') {
+						module.field.innerHTML = '';
+
+						socket.emit('message send', message);
+						socket.on('message send return', function(data) {
+							//console.log('サーバーからのデータ',data);
+							chatline(data);
+						});
+					} else {
+						alert('must id & message!');
+						return;
+					}
+
+					photoFile = '';
+
+				}
+			//pushChat
+			}();
+			//create file object
+			var createFile = function createFile() {
+				var reader = new FileReader();
+
+				id('photo').addEventListener('change', file, false);
+				reader.addEventListener('load', fileCheck,false);
+
+				//generate file object
+				function file(e) {
+					var target = e.target;
+					var files = target.files;
+					//文字データにする
+					reader.readAsDataURL(files[0]);
+				}
+
+				//アップロード前のチェック
+				function fileCheck() {
+					photoFile = thumnail(reader.result);
+				}
+
+				//check before uploading image
+				function thumnail(photo) {
+
+					module.field.innerHTML = '';
+
+					var image = new Image();
+							image.src = photo;
+
+					module.field.appendChild(image);
+
+					var photoData = {};
+							photoData.photo = photo;
+
+					//socketに渡す
+					image.onload = function() {
+						//console.log('写真', this);
+						var ratio = 300 / this.naturalWidth;
+						var rad = 0;
+
+						photoData.width = this.width = this.naturalWidth * ratio;
+						photoData.height = this.height = this.naturalHeight * ratio;
+
+						if(_ua.Mobile || _ua.Tablet) {
+							rotate(this, 'touchstart');
+						} else {
+							rotate(this, 'click');
+						}
+
+						function rotate(target, event) {
+							target.addEventListener( event, function() {
+								//console.log(target);
+								rad += 90;
+								target.style.webkitTransition = '1s ease 0';
+								target.style.webkitTransformOrigin = '50% 50%';
+								target.style.webkitTransform = 'rotate(' + rad + 'deg)';
+
+							},false);
+						}
+
+					};
+					return photoData;
+				}
+			//createFile end
+			}();
+		//chat end
 		}();
-
 		//create chat line
 		var chatline = function(data) {
-
 			//initialize
 			id('stage').innerHTML = '';
 			id('message').value = '';
@@ -704,6 +751,7 @@ var socketIo = function() {
 									html += '<span id="' + this._id + '" class="removeChat"><img src="./images/icon_check_alt.svg"></span></div>';
 
 				id('stage').innerHTML = html + id('stage').innerHTML;
+			//createChat end
 			};
 
 			for(var i=0,n=data.length ;i<n;i++) {
@@ -727,10 +775,11 @@ var socketIo = function() {
 						//console.log(id, target.parentNode);
 						socket.emit('chat remove', id);
 						socket.on('chat remove return', function(data) {
-							console.log(data);
+							//console.log(data);
 						});
 					},false);
 				}
+			//removeChat end
 			}();
 
 			//画像　download
@@ -752,10 +801,12 @@ var socketIo = function() {
 					},false);
 				}
 			}*/
-		}
+		//chatline end
+		};
+	//moduel.chatModule
 	}();
-}; //socket end
-
+//socket
+};
 /* -------------- bitcoin page module ------------------ */
 var bitcoin = function() {
 	id('getBitcoinData').addEventListener('click', getBitcoinData, false);
@@ -789,8 +840,8 @@ var bitcoin = function() {
 
 		}());
 	}
+//bitcoin end
 };
-
 /* -------------- scraping page module ------------------ */
 var scraping = function() {
 	id('scrape').addEventListener('click',function() {
@@ -808,8 +859,8 @@ var scraping = function() {
 			scraping();
 		});
 	},false);
+//scraping end
 };
-
 /* --------------- mongoose page module ----------------- */
 var upsert = function() {
 	$(function() {
