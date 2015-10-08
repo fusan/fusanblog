@@ -11,7 +11,6 @@ var promise = require('es6-promise').Promise;
 router.get('/', function(req, res) {
 	console.log('emitter');
 
-
 	//constractor
 	function MyStream () {
 		events.EventEmitter.call(this);
@@ -31,7 +30,7 @@ router.get('/', function(req, res) {
 
 	MyStream.prototype.call = function() {
 
-	}
+	};
 
 	//インスタンスを生成
 	var stream = new MyStream();
@@ -48,15 +47,15 @@ router.get('/', function(req, res) {
 			res.render('emitter', {title: 'eventEmitter', data: value + data.toString()})
 			//res.send(data2 + data.toString());
 		});
-		
+
 	});
-	
+
 	stream.write([1,2,100]);
 
 });
 
 router.get('/:id', function(req, res) {
 	res.send(req.params);
-})
+});
 
 module.exports = router;
