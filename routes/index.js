@@ -146,10 +146,9 @@ router.get('/scrape', function(req, res) {
 router.get('/socket', function(req,res) {
 	//console.log(req.query)
 	var header = '<h4 id="viewHeaderTitle">'+ req.url.split('/')[1] +'</h4>';
-	
+
 	var html = '<button class="subModules" id="geolocationModule">Map</button><button class="subModules" id="presentTextMoudule">Text</button>' +
 			'<button class="subModules" id="ballModule">Ball</button>' +
-			'<span style="float:right;">２画面たちあげてください。</span>' +
 			'<div id="testField"></div>' +
 			'<section id="chat"><div id="chatTimeLine"><div id="submit"><div id="messageCard">+</div></div></div>' +
 	    '<div id="stage"></section>';
@@ -172,10 +171,10 @@ router.get('/socket', function(req,res) {
 });
 
 router.get('/socket/geolocation', function(req,res) {
-	var html = '<div id="googleMap"></div>' +
-						'<div id="infomation"><div><img src="/images/icon_cone.svg" id="getRoot" title="ルートロギング">' +
-						'<img src="/images/icon_pin.svg" id="getPosition" title="訪問先マッピング"></div>' +
-						'<span id="presentLocation"></span></div>';
+	var html = '<div id="googleMap"></div>'
+					 + '<div id="mappingButtons"><img src="/images/icon_cone.svg" id="getRoot" title="ルートロギング">'
+					 + '<img src="/images/icon_pin.svg" id="getPosition" title="訪問先マッピング"></div>'
+					 + '<div id="infomation"><div id="presentLocation"></div></div>';
 	res.send(html);
 });
 

@@ -24,8 +24,8 @@ var _ua = (function(u){
 
 /* ------------------- global value --------------- */
 //var socket = io.connect('http://localhost:3000');
-var socket = io.connect('https://fusanblog.herokuapp.com'); //heroku 用
-//var socket = io.connect('http://54.92.9.226:3000'); //aws 用
+//var socket = io.connect('https://fusanblog.herokuapp.com'); //heroku 用
+var socket = io.connect('http://54.92.9.226:3000'); //aws 用
 //model.js も変更
 var modal = modal;
 
@@ -336,14 +336,15 @@ var socketIo = function() {
 				var output = '';
 
 				for(var i=0,n=json.length;i<n;i++) {
+          var date = new Date(json[i].date);
 					//display deta 編集して見た目およくできる。
-					output += 'No. :' + json[i].id + '<br>' +
-									'訪問日' + json[i].date + '<br>' +
-									'緯度：' + json[i].latitude + '<br>' +
-									'経度：' + json[i].longitude + '<br>' +
-									'コメント：' + json[i].comment + '<br>' +
-									'<span id="' + json[i]._id + '" class="removeData"> × </span><br>';
+					output += '<div class="wrap"><div>No.' + json[i].id + '</div>'
+								+ '<div>' + date.getFullYear() + '.' +date.getMonth() + '.' + date.getDate() +'</div>'
+								+	'<div>緯度' + json[i].latitude.toFixed(2) + '</div>'
+								+	'<div>経度' + json[i].longitude.toFixed(2) + '</div>'
+								+	'<div>' + json[i].comment + '<span id="' + json[i]._id + '" class="removeData"> × </span>' + '</div></div>';
 				}
+
 				return output;
 			}
 

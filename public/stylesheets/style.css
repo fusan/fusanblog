@@ -99,8 +99,8 @@ header button {
   margin: 0.2rem 0 0 0;
 	width: 100%;
 	height: 300px;
-	overflow: scroll;
-	box-shadow: 0 0 1px gray;
+	overflow: hidden;
+	/*box-shadow: 0 0 1px gray;*/
 }
 
 #testFieldInner {
@@ -172,40 +172,63 @@ header button {
 }
 
 #infomation {
+  position: relative;
   float: right;
   margin: 0;
   padding: 0;
   width: 30%;
-  height: 100%;
+  height: 90%;
   overflow: scroll;
-}
-
-#infomation > * {
-  margin: 2%;
-}
-
-#infomation > div {
-  height: 15%;
-  background: rgb(128, 128, 128);
 }
 
 #infomation img   {
   margin: .5rem;
 }
 
+.removeData {
+  color: red;
+  float: right;
+}
+
+.wrap {
+  margin: 0 0 1rem 0;
+  border-bottom: 1px dotted gray;
+}
+
+.wrap > div {
+  margin: 0 0 0 0.3rem;
+  color: gray;
+}
+
+#mappingButtons  {
+  float: left;
+  width: 30%;
+  height: 10%;
+  background: rgb(255, 255, 255);
+  -webkit-filter: blur(0);
+}
+
+#mappingButtons > img {
+  margin: 0;
+  float: right;
+}
+
 .subModules {
   margin: 0 .2rem 0 0;
-  border-color: transparent;
-  color: rgb(0, 0, 0);
-  text-shadow: 1px 1px 0px gray;
+  color: gray;
+  background: none;
+	border: none;
+	border-radius: 0;
+	outline: none;
+  -webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
 }
 
 #presentLocation {
   margin-top: 0;
-  display: inline-block;
-  width: 96%;
+  width: 100%;
   height: auto;
-  background: rgb(223, 223, 218);
 }
 
 /* chat */
@@ -319,7 +342,6 @@ header button {
   width: 320px;
   height: 320px;
 }
-
 
 @media screen and (max-width: 760px) {
   body {
