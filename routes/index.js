@@ -135,9 +135,9 @@ router.get('/experiment',(req, res) => {
 router.get('/ui', (req, res) => {
   var header = `<h4 id="viewHeaderTitle">${req.url.split('/')[1]}</h4>`;
 	var html = `<h4>Apple TV UI</h4>
-              <div id="TVUI"></div><div id="TVUI2"></div>
-							<div style="clear: both;"></div>
-							<h4>Scope UI</h4><div id="SCUI"></div>`;
+              <div id="TVUI"></div><div id="TVUI2">
+              </div><div style="clear: both;"></div>
+              <h4>Scope UI</h4><div id="SCUI"></div>`;
 
 	res.send({html: html, header: header,route: req.url.split('/')[1]});
 });
@@ -146,60 +146,68 @@ router.get('/ui', (req, res) => {
 router.get('/stock', (req, res) => {
 	var header = `<h4 id="viewHeaderTitle">${req.url.split('/')[1]}</h4>`;
 	var html = `<div id="console"><span id="addFinanceData">add</span><span id="visualize">visualize</span>
-        			<span id="erase">remove</span><span id="analytics">analytics</span></div><section class="dataForm">
-        			<div id="data"></div></section>`;
+            <span id="erase">remove</span><span id="analytics">analytics</span></div><section class="dataForm">
+            <div id="data"></div></section>`;
 
 	res.send({html: html, header: header,route: req.url.split('/')[1]});
 });
 
 //yahoo finance data sraping -> insert mongodb & create json.
 router.get('/stock/getFinanceData', (req, res, next) => {
-	//console.log(req.query);
+
 	const yahoofinance = 'http://profile.yahoo.co.jp/consolidate/';
 
 	var query = {
-		'url': `${yahoofinance}${req.query.ticker_no}`,
-		'type': 'html',
-		'selector': 'body',
-		'extract': 'html'
+    'url': `${yahoofinance}${req.query.ticker_no}`,
+    'type': 'html',
+    'selector': 'body',
+    'extract': 'html'
 	};
 
 	noodle.query(query).then((results) => {
 		//console.log(results);
 		new Promise((resolve, reject) => {
 
-			var domString = results.results[0].results[0];
-					resolve(domString);
+      var domString = results.results[0].results[0];
+
+      resolve(domString);
 
 		}).then((v) => {
 
-			var $ = cheerio.load(v);
-			return $;
+      var $ = cheerio.load(v);
+
+      return $;
 
 		}).then((v) => {
-			var financeDataInsert = function* financeDataInsert() {
-				yield yahoo_finance.scrape(v);
-				yield res.send('finish');
-			}();
 
-			financeDataInsert.next();
-			financeDataInsert.next();
-			//generator で待機して　nodata or get dataを返しえその結果をクライアントに返す
+      var financeDataInsert = function* financeDataInsert() {
 
-		});
-	});
+        yield yahoo_finance.scrape(v);
+        yield res.send('finish');
+
+      }();
+
+      financeDataInsert.next();
+      financeDataInsert.next();
+
+      //generator で待機して　nodata or get dataを返しえその結果をクライアントに返す
+
+    });
+  });
 });
 
 router.get('/stock/:id(\\d+)', function(req, res){
-	console.log(req.params.id);
-	//差分のみ追記　fs.appendFile　かな？
-	fs.readFile('./json/' + req.params.id + '.json', 'utf8', function(err, data) {
-		res.send(data);
-	});
+
+  console.log(req.params.id);
+  //差分のみ追記　fs.appendFile　かな？
+  fs.readFile('./json/' + req.params.id + '.json', 'utf8', function(err, data) {
+      res.send(data);
+    });
 });
 
 /* ------------------ reserveSystem2 ----------------- */
 router.get('/reserveSystem2', (req, res) => {
+
     var header = `<h4 id="viewHeaderTitle">${req.url.split('/')[1]}</h4>`;
     var html = '<section id="stage"></section>';
     var route = req.url.split('/')[1];
@@ -209,6 +217,7 @@ router.get('/reserveSystem2', (req, res) => {
 
 //管理画面
 router.get('/reserveSystem2/admin', (req, res) => {
+
   var html = `<button id="registration">在庫登録</button><button id="reserved_check">予約確認</button>`;
 
   res.render('admin', {title: '管理画面', html: html});
@@ -221,9 +230,10 @@ router.get('/reserveSystem2/admin/push_reserve', (req,res) => {
   var conditions = { "reserve_id": req.query.reserve_id };
   var doc = { "reserve_id": req.query.reserve_id, "reserve_nums":  req.query.reserve_nums};
   var options = { "upsert" : true };
+
   //更新データチェック
   Reserve_stock.update(conditions, doc, options, (err, data) => {
-    console.log(data);
+    //console.log(data);
     //全データ取得
     Reserve_stock.find({}, (err, data) => {
       //console.log(data);
@@ -342,19 +352,19 @@ router.get('/reserveSystem', (req, res) => {
 });
 
 router.get('/inStore', (req, res) => {
-	console.log(Object.keys(req.query).length === 0);
-	if(Object.keys(req.query).length === 0) {
+  console.log(Object.keys(req.query).length === 0);
+  if(Object.keys(req.query).length === 0) {
 
-		Reserve.find({}, (err,data) => {
-			if(err) throw err;
-			console.log('insert or init', data);
-			res.send(data);
-		});
+    Reserve.find({}, (err,data) => {
+      if(err) throw err;
+      console.log('insert or init', data);
+      res.send(data);
+    });
 
 	} else {
 
-		var reserve = new Reserve(req.query);
-		//console.log(reserve);
+    var reserve = new Reserve(req.query);
+    //console.log(reserve);
 		reserve.save((err) => {
 			if(err) throw err;
 			Reserve.find({}, (err,data) => {
@@ -386,27 +396,15 @@ router.get('/allClear', (req,res) => {
 	});
 })
 
-//stream api test
-/*
-router.get('/stream', (req, res) => {
-	//console.log(req.url.split('/')[1]);
-
-	var header = `<h4 id="viewHeaderTitle">${req.url.split('/')[1]}</h4>`;
-	var html = '<h2>stream</h2>';
-
-	res.send({html: html, header: header,route: req.url.split('/')[1]});
-});
-*/
-
 //vote app
 router.get('/vote', (req, res) => {
 	//console.log(req.url.split('/')[1]);
 	var header = `<h4 id="viewHeaderTitle">${req.url.split('/')[1]}</h4>`;
 
 	var html = `<div id="agreement"><span>雰囲気はいかがですか？</span>
-							<button id="agree">良かった</button><button id="disagree">良くなかった</button></div>
-							<div class="stackedChart"><div id="agreebar"></div><div id="disagreebar"></div></div>
-							<div id="pieChart"></div>`;
+              <button id="agree">良かった</button><button id="disagree">良くなかった</button></div>
+              <div class="stackedChart"><div id="agreebar"></div><div id="disagreebar"></div></div>
+              <div id="pieChart"></div>`;
 
 	res.send({html: html, header: header,route: req.url.split('/')[1]});
 });
@@ -441,10 +439,7 @@ router.get('/vote/push', (req, res) => {
 			res.send(votes);
 		});
 	});
-	//database insert
-		//database find
-			//res.send vote data
-			//rendering to client side by d3.js or DOM + css
+
 });
 
 //mongodb upsert test
@@ -494,9 +489,9 @@ router.get('/scrape', (req, res) => {
 		console.log('results');
 		var html = results.results[0].results[0];
 		var header = `<h4 id="viewHeaderTitle">${req.query.url}</h4>
-          				<div style="background: rgba(0,0,0,.08);margin:.4rem .2rem;">URL : http://www.
+                  <div style="background: rgba(0,0,0,.08);margin:.4rem .2rem;">URL : http://www.
                   <input type="text" name="scrape" id="scrapeURL">
-          				<button id="scrape">scrape</button></div>`;
+                  <button id="scrape">scrape</button></div>`;
 
 		res.send({html: html, header: header,route: req.url.split('/')[1]});
 	});
@@ -508,27 +503,14 @@ router.get('/socket', (req,res) => {
 	var header = `<h4 id="viewHeaderTitle">${req.url.split('/')[1]}</h4>`;
 
 	var html = `<button class="subModules" id="geolocationModule">Map</button>
-        			<button class="subModules" id="ballModule">Ball</button>
-        			<div id="testField"></div>
-        			<section id="chat">
+              <button class="subModules" id="ballModule">Ball</button>
+              <div id="testField"></div>
+              <section id="chat">
               <div id="chatTimeLine"><div id="submit"><div id="messageCard">+</div></div></div>
-        	    <div id="stage"></section>`;
+              <div id="stage"></section>`;
 
 	    res.send({html: html, header: header,route: req.url.split('/')[1]});
 
-	    /*easyimage.resize({
-           src:'./public/images/IMG_0449.jpg',
-           dst:'./public/images/output/0449.jpg',
-           width:500, height:500,
-           cropwidth:128, cropheight:128,
-           x:0, y:0
-        }).then(
-            function(file) {
-                  console.log(file);
-                }, function (err) {
-                  console.log(err);
-                }
-              );*/
 });
 
 router.get('/socket/geolocation', (req,res) => {
@@ -542,7 +524,7 @@ router.get('/socket/geolocation', (req,res) => {
 
 //年度データがなければ丸ごと挿入、修正値があれば修正値のみ変更　upsertの威力
 router.get('/insert', (req, res) => {
-	var settlement = validator.escape(req.query.settlement),
+  var settlement = validator.escape(req.query.settlement),
 		company = validator.escape(req.query.company),
 		sales = validator.escape(req.query.sales);
 

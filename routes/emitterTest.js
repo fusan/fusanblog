@@ -5,9 +5,6 @@ var events = require('events');
 var util = require('util');
 var fs = require('fs');
 
-var promise = require('es6-promise').Promise;
-//console.log(promise);
-
 router.get('/', function(req, res) {
 	console.log('emitter');
 

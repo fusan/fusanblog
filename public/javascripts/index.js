@@ -309,6 +309,7 @@ var mail = function mail(button) {
     });
 
   }
+
 //end
 }(document.getElementById('open_mail_form'));
 
@@ -326,20 +327,21 @@ var routing = function(buttons) {
 					type: 'GET'
 				});
 
-			view.done(function(data) {
-				//view *変動するviewを増やしたかったらselectorを増やす。
-				id('viewHeader').innerHTML = data.header;
-				id('viewArea').innerHTML = data.html;
+      view.done(function(data) {
 
-				//コントローラー
-				//ES6になったらmoduleにexportする
-				//ajaxとviewを組み合わせた関数モジュール群
+        //view *変動するviewを増やしたかったらselectorを増やす。
+        id('viewHeader').innerHTML = data.header;
+        id('viewArea').innerHTML = data.html;
+
+        //コントローラー
+        //ES6になったらmoduleにexportする
+        //ajaxとviewを組み合わせた関数モジュール群
         if(selector === 'experiment') experiment();
-				if(selector === 'scraping') scraping();
-				//if(selector === 'upsert') upsert();
-				if(selector === 'socket') socketIo();
-				if(selector === 'bitcoin') bitcoin();
-				if(selector === 'vote') vote();
+        if(selector === 'scraping') scraping();
+        //if(selector === 'upsert') upsert();
+        if(selector === 'socket') socketIo();
+        if(selector === 'bitcoin') bitcoin();
+        if(selector === 'vote') vote();
         if(selector === 'reserveSystem') reserveSystem(document.getElementById('stage'));
         if(selector === 'reserveSystem2') reserveSystem2(document.getElementById('stage'));
         if(selector === 'stock') stock();
@@ -362,21 +364,21 @@ var upsert = function() {
     		var $settlement = $('#settlement');
     		var $company = $('#company');
 
-    		if($settlement.val() !=='' && $company.val() !=='') {
+        if($settlement.val() !=='' && $company.val() !=='') {
 
-    			var test = $.ajax({
-	    			url: '/insert',
-	    			type: 'GET',
-	    			data: {
-	    				settlement: $settlement.val(),
-	    				company: $company.val(),
-	    				sales: $('#sales').val()
+          var test = $.ajax({
+            url: '/insert',
+            type: 'GET',
+            data: {
+              settlement: $settlement.val(),
+              company: $company.val(),
+              sales: $('#sales').val()
 	    			}
 	    		});
 
-	    		test.done(function(data) {
-	    			var $ul = $('<ul>');
-	    				$ul.append(`<span>${data[0].company}</span>`);
+          test.done(function(data) {
+            var $ul = $('<ul>');
+              $ul.append(`<span>${data[0].company}</span>`);
 
 	    			for(var i=0,n=data.length; i<n; i++) {
 	    				data[i].sales === null ? data[i].sales = 0 : data[i].sales = data[i].sales;
