@@ -8,6 +8,31 @@ exports.listen = function(server) {
   io.on('connection', function (socket) {
     console.log('index connected');
 
+    socket.on('bitcoin data send' ,function(data) {
+      socket.emit('bitcoin data send return', data);
+    });
+
+    /*
+    //get bitcoindata by server side
+    var PubNub = require('pubnub');
+
+    var pubnub = PubNub({
+        subscribe_key: "sub-c-52a9ab50-291b-11e5-baaa-0619f8945a4f"
+    });
+
+    pubnub.subscribe({
+        channel: "lightning_ticker_BTC_JPY",
+        message: function (data) {
+            console.log(data);
+            socket.emit('bitcoin send', data);
+        }
+    });
+    */
+
+    socket.on('mvc push', (data) => {
+      socket.emit('mvc push return',data );
+    });
+
     socket.on('init pin', function (data) {
 
       Marker.find({}, function(err, data) {
@@ -16,6 +41,10 @@ exports.listen = function(server) {
         socket.broadcast.emit('init pin return', data);
       });
 
+    });
+
+    socket.on('bitcoin send', function(data) {
+      console.log(data);
     });
 
     //create marker  / save database

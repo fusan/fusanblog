@@ -4,7 +4,3 @@ var socket = io.connect('https://fusanblog.herokuapp.com/users'); //本番
   socket.on('namespace!', function(data) {
       console.log(data);
   });
-
-function id(id) {
-  return document.getElementById(id);
-}

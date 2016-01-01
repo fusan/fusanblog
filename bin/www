@@ -13,6 +13,7 @@ var http = require('http');
 var model  = require('../model.js');
   Chat = model.Chat;
   Marker = model.Marker;
+  Reserve = model.Reserve;
 
 /**
  * Get port from environment and store in Express.
@@ -31,7 +32,7 @@ var server = http.createServer(app);
 */
 var socketServer = require('../socketServer.js');
   socketServer.listen(server);
-
+  
 /**
  * Listen on provided port, on all network interfaces.
  */

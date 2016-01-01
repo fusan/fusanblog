@@ -46,7 +46,7 @@ header button {
 	margin: 0;
 	padding: 0;
 	height: 99%;
-	width: 99%;
+	width: 100%;
 }
 
 #viewHeader {
@@ -343,6 +343,88 @@ header button {
   height: 320px;
 }
 
+/* stock */
+#console {
+  height: 2rem;
+  background: gray;
+}
+#console span {
+  display: inline-block;
+  margin:0 1rem 0 0;
+  padding: 0 0 0 0.5rem;
+  height: 2rem;
+  line-height: 2rem;
+  color: white;
+}
+
+.axis path, .axis line {
+	fill:none;
+	stroke:gray;
+
+}
+.axis text {
+	font-size: .64em;
+}
+
+/* ------- reservesystem2 ------------- */
+.calendar {
+  padding:20px 0 0 20px;
+  margin:20px 0 0 20px;
+  background:white;
+  float:left;
+}
+.calendar_header {
+  background: rgb(170, 169, 169);
+  color: rgb(240, 240, 240);
+  text-align: center;
+  line-height: 40px;
+}
+
+.sun {
+  background: rgba(255, 0, 0, 0.71);
+  color: white;
+}
+
+.other {
+  background: rgb(247, 247, 247);
+  color: gray;
+}
+
+.stock {
+  float:right;
+  margin:0;
+  padding:0;
+  text-align:center;
+  border:0 solid transparent;
+  box-shadow:-1px 1px 1px gray;
+  /* border-radius:100%; */
+  background:white;
+  color:red;
+}
+
+.stock_c {
+  float:right;
+  margin:0;
+  padding:0;
+  text-align:center;
+  box-shadow: 0 0 1px gray inset;
+  /* border-radius:100%; */
+  background:white;
+  color:red;
+}
+
+.form_head {
+  text-align:center;
+  background:rgb(36, 127, 156);
+  color:white;
+}
+
+.form_data {
+  margin: 4px 0 0 4px;
+  color: gray;
+}
+
+/* --------- reservesystem2 end --------- */
 @media screen and (max-width: 760px) {
   body {
     margin: 0;
@@ -365,4 +447,17 @@ header button {
     background: white;
     box-shadow: rgba(255, 255, 255, 0.5);
   }
+}
+
+/* mail */
+#open_mail_form {
+  display: inline-block;
+  float: right;
+  line-height: 28px;
+  margin-right: 4px;
+}
+
+#mail_title {
+  padding-left: 4px;
+  margin-left: 6px;
 }
