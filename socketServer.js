@@ -1,7 +1,7 @@
 exports.listen = function(server) {
 
   var io = require('socket.io').listen(server);
-  var io2 = io.of('/users');
+  var io2 = io.of('/list');
 
   var validator = require('validator');
 

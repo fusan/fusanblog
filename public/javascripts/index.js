@@ -1,35 +1,14 @@
 /* ------------------- global value --------------- */
 var socket = io.connect('http://localhost:3000');
 //var socket = io.connect('https://fusanblog.herokuapp.com'); //heroku 用
-//var socket = io.connect('http://54.92.9.226:3000'); //aws 用
+//var socket = io.connect('http://52.192.89.147:3000'); //aws 用
 //model.js も変更
-/*
-window.addEventListener('load', function() {
 
-  var holidays = ['12/31','1/1','1/2', '1/3'];
+//システムフロー
+//視線が止まったポイントが思考が深まった、もしくは停止したポイント
+//フローを直列で繋いでいくとミスが出にくい
+//フローを分散する
 
-  var today = `${new Date().getMonth() + 1}/${new Date().getDate()}`;
-
-  var inner = document.createElement('div');
-
-  for(var i=0,n=holidays.length;i<n;i++) {
-    if(today === holidays[i]) modal_controller(true, document.body, inner);
-  }
-
-  var days = function () {
-    var data = '';
-    for(var i=0,n=holidays.length;i<n;i++) {
-      data += holidays[i];
-    }
-    return data;
-  }();
-
-  inner.style.margin = '0 auto';
-  inner.innerHTML = `<h4>年末年始営業時間のご案内</h4>
-  <p>昨年中は大変お世話になりました。<br>新年は１月４日から営業いたします。<br>休業日${days}</p>`;
-
-},false);
-*/
 /* --------- modal contoroller ----------------------------*/
 //htmlファイルのbodyの最後にmodalようのdiv要素を配置すればどこでも浸かる。
 var modal_controller = function modal_controller(flag, outer, inner, style) {
