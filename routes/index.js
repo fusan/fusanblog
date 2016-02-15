@@ -29,23 +29,6 @@ const mail = {
 
 const yahoo_finance = require('./yahooscrape');
 
-/*
-//child_process
-const exec = require('child_process').exec;
-exec('ls',(err,stdout,stderr) =>  {
-	//ok data,ls,cat,curl
-	//bad vi,cal
-	if(stdout) {
-		console.log(`stdout:${stdout}`);
-	} else if(stderr){
-		console.log(`stderr:${stderr}`);
-	} else {
-		console.log(`err:${err}`);
-	}
-
-});
-*/
-
 // Root
 router.get('/', (req, res, next) => {
   res.render('index', { title: 'Test App' });
@@ -108,13 +91,13 @@ router.get('/mail',(req, res) => {
   var email = new Mail_data(json);
   console.log(email);
 
-  transport.sendMail(mailOptions, function(error, response) {
+  transport.sendMail(mailOptions, (error, response) => {
 
       if(error){
-          console.log(error);
-      }else{
-          console.log('Message sent: ' + response.message);
-          res.send(response.message);
+        console.log(error);
+      } else {
+        console.log('Message sent: ' + response.message);
+        res.send(response.message);
       }
 
       transport.close();
@@ -123,9 +106,42 @@ router.get('/mail',(req, res) => {
 
 });
 
+router.get('/api', (req, res) => {
+  console.log(req.query);
+  var json = new Promise((resolve, reject) => {
+
+    let _json = lucky_no(req.query);
+    resolve(_json);
+
+  });
+
+  json.then((value) => {
+    console.log(value);
+
+    let html = `<html><body><span id="test">${value.key}</span></body></html>`;
+
+    res.send(html);
+
+  });
+
+});
+
+function lucky_no(data) {
+
+  console.log(typeof data.key);
+
+  let _data = ` is licky no ${Math.floor(Math.random() * 100)}. it is closure!`;
+
+  data.key = `${data.key}${_data}`;
+
+  console.log(data);
+
+  return data;
+}
+
 //experiment
 router.get('/experiment',(req, res) => {
-  var header = `<h4 id="viewHeaderTitle">${req.url.split('/')[1]}</h4>`;
+  var header = `<h4 id="viewHeaderTitle">${req.url.split('/')[1]}<span id="sub_page_help">?</span></h4>`;
 	var html = `<div id="experiment_stage"></div>`;
 
   res.send({html: html, header: header,route: req.url.split('/')[1]});
@@ -133,10 +149,10 @@ router.get('/experiment',(req, res) => {
 
 //ui page
 router.get('/ui', (req, res) => {
-  var header = `<h4 id="viewHeaderTitle">${req.url.split('/')[1]}</h4>`;
+  var header = `<h4 id="viewHeaderTitle">${req.url.split('/')[1]}<span id="sub_page_help">?</span></h4>`;
 	var html = `<h4>Apple TV UI</h4>
-              <div id="TVUI"></div><div id="TVUI2">
-              </div><div style="clear: both;"></div>
+              <div id="TVUI"></div><div id="TVUI2"></div><div id='TVUI3'></div>
+              <div style="clear: both;"></div>
               <h4>Scope UI</h4><div id="SCUI"></div>`;
 
 	res.send({html: html, header: header,route: req.url.split('/')[1]});
@@ -144,7 +160,7 @@ router.get('/ui', (req, res) => {
 
 //open stock page
 router.get('/stock', (req, res) => {
-	var header = `<h4 id="viewHeaderTitle">${req.url.split('/')[1]}</h4>`;
+	var header = `<h4 id="viewHeaderTitle">${req.url.split('/')[1]}<span id="sub_page_help">?</span></h4>`;
 	var html = `<div id="console"><span id="addFinanceData">add</span><span id="visualize">visualize</span>
             <span id="erase">remove</span><span id="analytics">analytics</span></div><section class="dataForm">
             <div id="data"></div></section>`;
@@ -344,7 +360,7 @@ router.get('/reserveSystem2/admin/get_reserve', (req,res) => {
 /* ------------------ reserveSystem ----------------- */
 router.get('/reserveSystem', (req, res) => {
 
-	var header = `<h4 id="viewHeaderTitle">${req.url.split('/')[1]}</h4>`;
+	var header = `<h4 id="viewHeaderTitle">${req.url.split('/')[1]}<span id="sub_page_help">?</span></h4>`;
 	var html = '<section id="stage"></section>';
   var route = req.url.split('/')[1];
 
@@ -413,23 +429,21 @@ router.get('/vote/push', (req, res) => {
 	console.log(req.query);
 
 	var voteJson = {};
-	voteJson.vote = req.query.vote;
+      voteJson.vote = req.query.vote;
 
 	var vote = new Vote(voteJson);
+
 	vote.save((err) => {
 		if(err) throw err;
 
 		Vote.find({}, (err,data) => {
 			if(err) throw err;
+
 			var votes = {};
 			var agrees = [],disagrees = [];
 
 			for (var i = 0,n = data.length; i < n; i++) {
-				if(data[i].vote === 'agree') {
-					agrees.push(data[i].vote);
-				} else {
-					disagrees.push(data[i].vote);
-				}
+				data[i].vote === 'agree' ? agrees.push(data[i].vote) : disagrees.push(data[i].vote);
 			}
 
 			votes.agree = agrees.length;
@@ -437,6 +451,7 @@ router.get('/vote/push', (req, res) => {
 
 			console.log(votes);
 			res.send(votes);
+
 		});
 	});
 
@@ -575,7 +590,9 @@ router.get('/getBitcoinData', (req, res) => {
 		pubnub.subscribe({
 				channel: "lightning_ticker_BTC_JPY",
 				message: (data) => {
-						console.log(data);
+          //insert db
+          //change event
+					console.log(data);
 				}
 		});
 	}

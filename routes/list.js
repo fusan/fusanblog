@@ -20,6 +20,7 @@ var week = ['日','月','火','水','木','金','土'];
 
 var initial_count = 100;//最初の会員様の番号 no100からスタートすることを示してる
 
+/* -------------  initial -----------------*/
 // トップページ
 router.get('/', (req, res, next) => {
 
@@ -39,6 +40,65 @@ router.get('/allList', (req, res) => {
 
 });
 
+//外部データ取り込み
+router.get('/inport',(req, res) => {
+	//外部データ読み込み xls-to-json でxlsファイルからインポートしてjson出力してそのままデータベースに突っ込む。fileapiをつかて
+	//ファイル読み込みアップロード、xlsで保存すりようにバリデーションする。
+	fs.readFile('member.json', 'utf8',(err, data) => {
+		var json = JSON.parse(data);
+		//console.log(json[0]);
+		for(var i=0,n=2; i<2; i++) { inportUser(i); }
+
+		function inportUser(i) {
+			return () => {
+
+				var user = new User(json[i]);
+
+				user.save((err) => {
+					//console.log(json[i]['会員番号']);
+					if(err) throw err;
+
+					User.find({'会員番号': json[i]['会員番号']}, (err, data) => { console.log(data); });
+
+				});
+			};
+		}
+		//データベースにインポートする
+		res.send(json[0]);
+	});
+});
+
+//誕生月判定
+router.get('/birthday', (req, res) => {
+
+	var thisMonth = new Date().getMonth() +1;
+	var luckers = [];
+
+	User.find({},(err, data) => {
+
+		for(var i=0,n=data.length;i<n;i++) {
+
+			var day = new Date(data[i]['生年月日']);
+
+			if( (day.getMonth() + 1) == thisMonth ) {
+
+				var lucker = {};
+						lucker.name = data[i]['氏名'];
+						lucker.birthday = `${(day.getMonth() + 1)}月${day.getDate()}日`;
+
+				luckers.push(lucker);
+
+			}
+
+		}
+
+		res.send(luckers);
+
+	});
+
+});
+
+/* ---------------  customer -------------- */
 // 新規登録画面
 router.get('/register', (req, res) => {
 
@@ -119,6 +179,8 @@ router.get('/:id(\\d+)', (req, res) => {
 
 });
 
+/* ------------  search ----------------- */
+//参考:http://stackoverflow.com/questions/3305561/how-to-query-mongodb-with-like
 //NO検索
 router.get('/card:id(\\d+)', (req, res) => {
 
@@ -146,13 +208,14 @@ router.get('/card:id(\\d+)', (req, res) => {
 
 });
 
-//名前検索       参考:http://stackoverflow.com/questions/3305561/how-to-query-mongodb-with-like
+//名前検索
 router.get('/search', (req,res) => {
 
 	User.where({'ふりがな': {'$regex': req.query.ruby}}).exec((err, data) => { res.send(data); });
 
 });
 
+/* ----------- visit history ----------- */
 // 来店履歴入力フォーム
 router.get('/appendKarte', (req, res) => {
 
@@ -160,7 +223,7 @@ router.get('/appendKarte', (req, res) => {
 
 });
 
-// 来店情報をデータベースに格納
+//来店情報の格納
 router.get('/updateLog', (req, res) => {
 	console.log(req.query);
 
@@ -200,38 +263,10 @@ router.get('/updateLog', (req, res) => {
 
 });
 
-
-// 来店履歴訂正フォーム
+//来店履歴訂正フォーム
 router.get('/modifyLogForm', (req, res) => {
 
 	res.send(modal.lastmodify(req));
-
-});
-
-//来店履歴を訂正　
-router.get('/modifyLog', (req, res) => {
-	//console.log(req.query);
-	var promise = new Promise((resolve, reject) => {
-
-		update.modify(req);
-		resolve('ok');
-
-	});
-
-	promise.then((value) => { res.redirect(`/list/card${req.query.no}`); });
-
-});
-
-//来店履歴を削除
-router.get('/removeLog', (req, res) => {
-	//console.log(req.query);
-	var promise = new Promise((resolve, reject) => {
-
-		Log.remove({'_id': req.query.id}, (err) => { if(!err) resolve('ok'); });
-
-	});
-
-	promise.then((value) => { res.redirect('/list/card' + req.query.no); });
 
 });
 
@@ -260,6 +295,34 @@ router.get('/log', (req, res) => {
 
 });
 
+//来店履歴を訂正
+router.get('/modifyLog', (req, res) => {
+	//console.log(req.query);
+	var promise = new Promise((resolve, reject) => {
+
+		update.modify(req);
+		resolve('ok');
+
+	});
+
+	promise.then((value) => { res.redirect(`/list/card${req.query.no}`); });
+
+});
+
+//来店履歴を削除
+router.get('/removeLog', (req, res) => {
+	//console.log(req.query);
+	var promise = new Promise((resolve, reject) => {
+
+		Log.remove({'_id': req.query.id}, (err) => { if(!err) resolve('ok'); });
+
+	});
+
+	promise.then((value) => { res.redirect('/list/card' + req.query.no); });
+
+});
+
+/* ----------- karte image ------------- */
 //カルテ画像を格納
 router.post('/appendIMG', (req, res) => {
 	//console.log(req.body);
@@ -267,20 +330,11 @@ router.post('/appendIMG', (req, res) => {
 
 	//画像データをデータベースに格納
 	var promise = new Promise((resolve, reject) => {
-		update.IMG(req); //Img modelにデータを挿入
-		/*
-		Img.find({'会員番号': no}, function(err, data) {
-			//console.log(data);
-			var now = new Date().getDay();
-			var last = data.length;
-			var lastPushDay = data[last]['保存日'];
-			//console.log(lastPushDay);
 
-			lastPushDay = lastPushDay.getDay();
-			console.log('格納日'　+lastPushDay,'現在時刻'+now);
-			if(lastPushDay == now) resolve('ok');
-		});*/
+		update.IMG(req);
+
 		resolve('ok');
+
 	});
 
 	//データベースから画像履歴を抽出
@@ -306,7 +360,7 @@ router.post('/appendIMG', (req, res) => {
 
 });
 
-//カルテ画像の表示　格納後のリロード処理
+//カルテ画像の登録
 router.get('/kartes', (req, res) => {
 	//console.log(data);
 	Img.find({'会員番号': req.query.no}, (err, data) => {
@@ -333,23 +387,17 @@ router.get('/kartes', (req, res) => {
 
 });
 
-//カルテ画像の削除フォーム
-router.get('/removeKarteForm', (req, res) => {
-	//console.log(req.query);
-	var html = modal.removeImg(req);
-	res.send(html);
-
-});
-
-//カルテ画像削除
+//カルテ画像の削除
 router.get('/removeImg', (req, res) => {
 
 	var promise = new Promise((resolve, reject) => {
 
 		Img.remove({'_id': req.query.id}, (err) => {
-			if(err) throw err;
 			//console.log('remove!: ' + req.query.id);
+			if(err) throw err;
+
 			resolve('remove');
+
 		});
 	});
 
@@ -357,7 +405,13 @@ router.get('/removeImg', (req, res) => {
 
 });
 
-//カルテメモ
+//カルテ削除フォームの生成
+router.get('/removeKarteForm', (req, res) => {
+	res.send(modal.removeImg(req));
+});
+
+/* ------------- memo ------------------ */
+//メモの登録
 router.get('/appendMemo', (req, res) => {
 	//データベースに格納 メモを更新していく。
 	var memos = {};
@@ -372,71 +426,14 @@ router.get('/appendMemo', (req, res) => {
 
 });
 
-//
+//メモ
 router.get('/memos', (req,res) => {
 
 	Memo.find({'会員番号': req.query.no}, (err, data) => { !data ? res.end() : res.send(data); });
 
 });
 
-//外部データ読み込み xls-to-json でxlsファイルからインポートしてjson出力してそのままデータベースに突っ込む。fileapiをつかて
-//ファイル読み込みアップロード、xlsで保存すりようにバリデーションする。
-router.get('/inport',(req, res) => {
-
-	fs.readFile('member.json', 'utf8',(err, data) => {
-		var json = JSON.parse(data);
-		//console.log(json[0]);
-		for(var i=0,n=2; i<2; i++) { inportUser(i); }
-
-		function inportUser(i) {
-			return () => {
-
-				var InportUser = new User(json[i]);
-
-				InportUser.save((err) => {
-					if(err) throw err;
-					console.log(json[i]['会員番号']);
-					User.find({'会員番号': json[i]['会員番号']}, (err, data) => {
-						console.log(data);
-					});
-				});
-			};
-		}
-		//データベースにインポートする
-		res.send(json[0]);
-	});
-});
-
-//誕生月判定
-router.get('/birthday', (req, res) => {
-
-	var thisMonth = new Date().getMonth() +1;
-	var luckers = [];
-
-	User.find({},(err, data) => {
-
-		for(var i=0,n=data.length;i<n;i++) {
-
-			var day = new Date(data[i]['生年月日']);
-
-			if((day.getMonth() + 1) == thisMonth) {
-
-				var lucker = {};
-						lucker.name = data[i]['氏名'];
-						lucker.birthday = `${(day.getMonth() + 1)}月${day.getDate()}日`;
-
-				luckers.push(lucker);
-
-			}
-
-		}
-
-		res.send(luckers);
-
-	});
-
-});
-
+/* -------------- analytics ------------- */
 //解析ページ
 router.get('/analytics', (req, res) => {
 
@@ -444,7 +441,7 @@ router.get('/analytics', (req, res) => {
 	var members;
 	var memberNo = 100;
 
-	//会員数を取得　ループの回数を定義
+	//会員数を取得 ループの回数を定義
 	//log履歴を全て取得して会員番号をqueryにして来店数を取得
 	var promise = new Promise((resolve, reject) => {
 
@@ -466,35 +463,31 @@ router.get('/analytics', (req, res) => {
 	});
 
 	promise.then((value) => {
-		//console.log('会員番号配列');
-		console.log('会員数' + members);
-		console.log(membersArray);
-
-		//ループの中でfindすると非同期処理に対応できない。findの中でループ処理をする。
+		//console.log('会員数', members);
+		//console.log('会員配列', membersArray);
 		for (var i=0,n=membersArray.length;i<n;i++) { analytics(i); }
 
 		function analytics(i) {
 			return () => {
-				//console.log(membersArray[i]);
+
 				Log.find({"会員番号" : parseInt(membersArray[i])}, (err, data) => {
-					//var visit = {};
-					//console.log('来店履歴データ');
-					//console.log(data);
+					//console.log('来店履歴データ',data);
 					if(err) throw err;
+
 					if(data[0] === undefined || data[0] === null) {
 						console.log(data[0] + 'データがない');
 						return;
 					} else {
+
 						var no = data[0]['会員番号'];
 						var times = data.length;
 
 						console.log(no+':'+times);
 
 						User.update({'会員番号': no}, {$set: {"来店回数": times}}, {upsert: true}, function(err, data) {
-							//console.log(data);
-							User.find({'会員番号': no}, (err, data) => {
-								//console.log(data);
-							});
+
+							User.find({'会員番号': no}, (err, data) => { console.log(data); });
+
 						});
 					}
 				});
@@ -503,12 +496,12 @@ router.get('/analytics', (req, res) => {
 		}
 	});
 
-	//解析用のデータを集める　mongo.find();
-	var html = modal.analytics(req);
-	res.send(html);
+	//解析用のデータを集める mongo.find();
+	res.send(modal.analytics(req));
 
 });
 
+//来店数ランキング
 router.get('/visitLanking',(req, res) => {
 	var limit = 10; //ランキング
 	User.where('来店回数').gt(1).limit(limit).exec((err, data) => {
@@ -517,6 +510,7 @@ router.get('/visitLanking',(req, res) => {
 	});
 });
 
+//指名数ランキング
 router.get('/nomineeCount', (req,res) => {
 	Log.where('指名').ne('').exec((err, data) => {
 		if(err) console.log(err);
@@ -525,6 +519,7 @@ router.get('/nomineeCount', (req,res) => {
 });
 
 router.get('/generation', (req,res) => {
+
 	User.find({}, (err, data) => {
 		if(err) throw err;
 
@@ -550,8 +545,27 @@ router.get('/generation', (req,res) => {
 		});*/
 
 		res.send(data);
+
 	});
+
 });
+
+//年齢計算
+function getAge (birthday, now) {
+
+	var b = new Date(birthday.getTime());
+	var n = new Date(now.getTime());
+
+	return (n-b)/ (365 * 24 * 60 * 60 *1000) - (n >= b ? 0: 1);
+
+}
+
+//オブジェクトのソート
+function sort(arr,key) {
+
+    arr.sort((a, b) => { return (a[key] > b[key]) ? 1 : -1; });
+
+}
 
 /*
 router.get('/updateLog', function(req,res) {
@@ -563,22 +577,6 @@ router.get('/updateLog', function(req,res) {
 	});
 	res.send('時間変更しました。');
 });*/
-
-//年齢計算
-  function getAge (birthday, now) {
-    var b = new Date(birthday.getTime());
-    var n = new Date(now.getTime());
-    return (n-b)/ (365 * 24 * 60 * 60 *1000) - (n >= b ? 0: 1);
-  }
-
-//オブジェクトのソート
-function sort(arr,key) {//obj: 対象オブジェクト配列, count: ソートプロパティ
-    arr.sort((a, b) => {
-      console.log(a,b);
-          return (a[key] > b[key]) ? 1 : -1;
-      });
-}
-
 
 /*
 io.on('connection', function (socket) {
@@ -602,8 +600,5 @@ var io = require('socket.io').(router);
 io.on('connection', function(socket){
   console.log('a user connected');
 });*/
-
-/* GET users listing. */
-
 
 module.exports = router;

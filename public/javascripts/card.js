@@ -41,13 +41,15 @@ $(function() {
           age = parseInt(age);
 
       //基本情報更新
-      $('#log').html(data);//document.getElementById('log').innerHTML = data;
-      $('#age').html(age);//document.getElementById('age').html = age;
-      $('#visitCount').html(list_length);//document.getElementById('visitCount').innerHTML = list_length;
-      $('#lastVisit').html(last_visit);//document.getElementById('last_visit').innerHTML = last_visit;
+      $('#log').html(data);
+      $('#age').html(age);
+      $('#visitCount').html(list_length);
+      $('#lastVisit').html(last_visit);
 
-      //来店履歴訂正　-> modifyKarete
-      $('.logList').on({ 'mouseenter': log_list, 'mouseleave': log_list, 'click': log_list });
+      //来店履歴訂正 -> modifyKarete
+      $('.logList').on('mouseenter', log_list);
+      $('.logList').on('mouseleave', log_list);
+      $('.logList').on('click', log_list);
 
       function log_list(e) {
 
@@ -198,6 +200,7 @@ $(function() {
 
   //メモデータの追記
   $('#add_memo').on('click', add_memo);
+
   function add_memo() {
 
     var oldMemo = $('#memos').html() + '<br>';
@@ -271,9 +274,9 @@ $(function() {
         });
       //end
       }
-
     //end
     }
+
   //end
   }();
 

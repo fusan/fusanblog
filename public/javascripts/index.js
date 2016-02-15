@@ -9,6 +9,166 @@ var socket = io.connect('http://localhost:3000');
 //フローを直列で繋いでいくとミスが出にくい
 //フローを分散する
 
+/* sidebar */
+var Slider = function Slider(parent, modal, position) {
+  var self = this;
+
+  this.flag = false;
+  this.parent = parent;
+  this.modal = modal;
+  this.position = position;
+
+  this.modal.width = this.parent.innerWidth;
+  this.modal.height = this.parent.innerHeight;
+
+};
+
+Slider.prototype.con = function() {
+  console.log(this);
+};
+
+Slider.prototype.open = function(e) {
+
+  //right
+  if(this.position === 'right') {
+    if(e.pageX > this.modal.width - 10) this.flag = true;
+    if(e.pageX < this.modal.width * 0.79 ) this.flag = false;
+  }
+
+
+  if(this.position === 'left') {
+    if(e.pageX < 10) this.flag = true;
+    if(e.pageX > this.modal.width * 0.21 ) this.flag = false;
+  }
+
+
+};
+
+Slider.prototype.style = function() {
+    //defalut
+    this.modal.style.width = 0;
+    this.modal.style.height = `${this.modal.height}px`;
+    this.modal.style.overflow = 'scroll';
+
+    if(this.flag) {
+      this.modal.style.height = `${this.modal.height}px`;
+      this.modal.style.width = `${this.modal.width * 0.2}px`;
+      if(this.position === 'right')
+        this.modal.style.right = 0;
+      if(this.position === 'left')
+        this.modal.style.left = 0;
+      this.modal.style.top = `${this.modal.height * 0.5}px;`
+      this.modal.style.transition = '0.5s ease 0';
+      this.modal.style.boxShadow = '0 0 1px black';
+    } else {
+      this.modal.style.width = 0;
+      this.modal.style.height = `${this.modal.height}px`;
+    }
+
+  };
+
+Slider.prototype.column = function(parent) {
+
+    if(this.flag) {
+
+      for(var i=0,n=10;i<n;i++) {
+        var list = document.createElement('div');
+            list.style.width = '100%';
+            list.style.height = 'auto';
+            list.style.margin = '0.5px 0 0 0';
+            i % 2 ? list.style.background = 'gray' : list.style.background = 'red';
+            list.textContent = i;
+
+        this.modal.appendChild(list);
+      }
+
+    } else {
+
+      while (this.modal.firstChild) {
+        this.modal.removeChild(this.modal.firstChild);
+      }
+
+    }
+
+  };
+
+var slider = new Slider(window, document.getElementById('modal'), 'right');
+    slider.parent.addEventListener('mousemove', function(e) {
+      slider.open(e);
+      slider.style();
+      //slider.column();
+    }, false);
+
+/* --------- modal contoroller class ----------------------------*/
+//style json { width: '' , height: '', screen: '', background: '' }
+var Modal = function Modal(style, button, contents) {
+
+  //prop
+  this.button = button;
+  this.win = document.createElement('div');
+
+  this.flag = true;
+
+  this.screen = style.screen;
+  this.width = style.width || window.innerWidth;
+  this.height = style.height || window.innerHeight;
+  this.background = style.background || `rgba(${0},${0},${0},${0.32})`;
+  this.contents = contents;
+  //style.screen === 'fullscreen' ? this.screen = 'fullscreen' : this.screen = '';
+
+  //style
+  this.win.style.top = 0;
+  this.win.style.left = 0;
+  this.win.style.width = 0;
+  this.win.style.height = 0;
+  this.win.style.background = this.background;
+  this.win.style.color = 'gray';
+  this.win.style.transition = '0.3s ease 0';
+
+  this.button.parentNode.appendChild(this.win);
+
+}
+
+Modal.prototype.con = function con() {
+  console.log(this);
+  };
+
+Modal.prototype.toggle = function toggle() {
+  var self = this;
+
+  this.button.addEventListener('mousedown', function(e) {self.flag ? self.open(e) : self.close(e);});
+};
+
+Modal.prototype.open = function open(e) {
+
+  this.flag = false;
+
+  //fullscreen or tooltip
+  this.screen === 'fullscreen' ? this.top = `0px` : this.top = `${this.button.offsetTop + this.button.offsetHeight}px`;
+  this.screen === 'fullscreen'  ? this.left = `0px` : this.left = `${this.button.offsetLeft}px`;
+
+  this.win.style.top = this.top;
+  this.win.style.left = this.left;
+  this.win.style.width = `${this.width}px`;
+  this.win.style.height = `${this.height}px`;
+  this.win.style.overflow = 'scroll';
+
+  this.win.innerHTML = this.contents;
+  //this.win.innerHTML = `<h3>${this.button.innerText}</h3><input type="text" placeholder="data name">`;
+
+  };
+
+Modal.prototype.close = function close(e) {
+
+  this.flag = true;
+  this.win.innerHTML = '';
+
+  this.win.style.height = this.win.style.width = 0;
+
+  //this.button.parentNode.removeChild(this.win);
+
+  };
+
 /* --------- modal contoroller ----------------------------*/
 //htmlファイルのbodyの最後にmodalようのdiv要素を配置すればどこでも浸かる。
 var modal_controller = function modal_controller(flag, outer, inner, style) {
@@ -293,9 +453,9 @@ var mail = function mail(button) {
 }(document.getElementById('open_mail_form'));
 
 /* -------------- contoroler module --------------- */
-var routing = function(buttons) {
+var router = function router(buttons) {
 
-	var createRouter = function (selector) {
+	var routing = function routing(selector) {
 
 		document.getElementById(selector).addEventListener('click',connection ,false);
 
@@ -327,12 +487,24 @@ var routing = function(buttons) {
         if(selector === 'ui') ui();
 
 			});
+
 		}
 	};
 
 	for(var i=0,n=buttons.length;i<n;i++) {
-		createRouter(buttons[i].getAttribute('id'));
+		routing(buttons[i].getAttribute('id'));
 	}
+
+  var api = $.ajax({
+      url: '/api',
+      type: 'GET',
+      data: {'key': 'fusan'}
+    });
+
+    api.done(function(obj){
+      console.log(obj);
+    });
+
 //end
 }(document.getElementsByTagName('button'));
 
@@ -378,74 +550,162 @@ var upsert = function() {
 /* --------------- test filed ---------------------- */
 var experiment = function experiment() {
 
-  /* mvc model */
-  var mvc = function mvc(stage, dbType) {
-    var input = document.createElement('input');
-    var display = document.createElement('span');
-        input.setAttribute('type', 'text');
-        input.id = 'view';
-        display.id = 'display';
+  //data flow == json -> button.innerText -> json.value -> push arg to module
 
-    var history = []; //change storage
-    var data_for_socket = {};
+  var router = function router(stage) {
+
+    var buttons = {};
+
+      //key button content / value argemnets
+      buttons.mvc = { stage: stage, dbType: 'localStorage', input: document.createElement('input'), output: document.createElement('span')};
+      buttons.snow = stage;
+      buttons.neuron = stage;
+      buttons.nets = stage;
+      buttons.calc = stage;
+
+    for(var key in buttons) { create_button(key); }
+
+    //button生成
+    function create_button(arg) {
+
+      var button = document.createElement('button');
+          button.textContent = arg;
+
+      stage.appendChild(button);
+
+      //buttonイベント
+      button.addEventListener('mousedown', link, false);
+
+    }
+
+    //buttonとモジュールの紐付け
+    function link(e) {
+
+      var page = this.innerText;
+      var arg = buttons[this.innerText];
+
+      if( page === 'mvc' ) mvc(arg);
+      if( page === 'snow' ) snow(arg);
+      if( page === 'neuron' ) neuron(arg);
+      if( page === 'nets' ) nets(arg);
+      if( page === 'calc') calc(arg);
+
+      //console.log(e.target.parentNode.children,e.target);
+
+    }
+
+    //style json { width: '' , height: '', screen: '', background: '' }
+    var modal = new Modal({width:300, height: 100, screen: '', background: 'white'},document.getElementById('sub_page_help'), (function() {
+      var html = `<h4>説明</h4>利回り計算をするためのツール。
+        <ul>基本的にクライアントサイドに保持、ローカルストレージを使っています。
+        visualizeにはD3.jsを使用。
+        <li>Likeでデータを保持</li>
+        <li>removeでデータを削除</li>
+        <li>optionでデータをビジュアライズ</li></ul>`;
+
+      return html;
+    }()));
+
+        Modal.prototype.name = 'fusan';
+
+        modal.name = 'youtan';
+        modal.width = window.innerWidth * 0.9;
+        modal.background = 'red';
+
+        modal.toggle();
+        modal.con();
+
+  //end
+  }(document.getElementById('viewArea'));
+
+  /* mvc model */
+  var mvc = function mvc(json) {
+
+    var stage = json.stage;
+    var dbType = json.dbType;
+    var input = json.input || '';
+    var output = json.output || '';
+
+    var history = [];
+
+    stage.innerHTML = '';
 
     stage.appendChild(input);
-    stage.appendChild(display);
+    stage.appendChild(output);
 
+    //style
+    stage.style.height = 'auto';
+    stage.style.boxShadow = '0 0 1px gray';
+
+    //Listener
     input.addEventListener('keyup',contoroller, false);
 
     function contoroller(e) {
-      console.log(this.value);
-      var text;
+      //console.log(this.value);
+      var state = this.value;
 
-      if(this.value === 'fusan') {
-        text = this.value + 'さん';
-      } else {
-        text = this.value;
-      }
+      //状態に合わせて追加
+      state === 'fusan' ? state += 'さん' : state ;
 
-      model(text,e,'server');
+      //５個前の履歴だけ残す。
+      if(history.length > 5) history.shift();
+      history.push(state);
+
+      model(state, e, 'server');
 
     }
 
     function model(data,e,dbType) {
       //データストレージ呼び出し、挿入
-      var text, color;
-      text = color = data;
+      var text = data;
+      var color = data;
 
       if(dbType === 'local') { //localStorage histroryArray insert iterable by chance event
+
         window.localStorage.setItem('text', text);
         window.localStorage.setItem('color', color);
+
         text = window.localStorage.getItem('text');
         color = window.localStorage.getItem('color');
-        console.log('local');
+
       }
 
       if(dbType === 'server') { //socket history timestamp <- e.object
-        data_for_socket.timestamp = e.timeStamp;
-        data_for_socket.data = data;
+        var posts = {};
+
+        posts.timestamp = e.timeStamp;
+        posts.data = data;
         //console.log(e.timeStamp);
-        socket.emit('mvc push', data_for_socket);
+        socket.emit('mvc push', posts);
         socket.on('mvc push return', function(data) {
-          console.log(data);
+          //console.log(data);
         });
+
       }
 
       view(text, color);
+
     }
 
     function view(text, color) {
-      display.textContent = text;
-      display.style.color = color;
+
+      output.textContent = text;
+      output.style.color = color;
+
     }
+
   //end
-  }(document.getElementById('experiment_stage'), 'localStorage');
+  };
 
   /* 背景　*/
   var snow = function snow(stage) {
+
+    stage.innerHTML = '';
+
     var window_w = window.screen.width;
     var window_h = window.screen.height;
 
+    stage.style.height = 'auto';
     stage.style.position = 'relative';
 
     var Snow = function Snow(dom,w,h,bg) {
@@ -502,10 +762,13 @@ var experiment = function experiment() {
     ランダムで生成しても良い。
     */
   //end
-  }(document.body);
+  };
 
   /* neuron test */
-  var neuron = function neuron() {
+  var neuron = function neuron(stage) {
+
+    stage.innerHTML = '';
+
     var u = function(x1, x2, b) {
       var _w1 = 1.3, _w2 = 1.3;
       return _w1 * x1 + _w2 * x2 + b;
@@ -522,7 +785,7 @@ var experiment = function experiment() {
       console.log('neuron test',results );
     }
   //end
-  }();
+  };
 
   var nets = function nets() { //伝播力　infulence ノード数　nodes
     var Net = function Net(infulence, nodes) {
@@ -537,38 +800,525 @@ var experiment = function experiment() {
     var net = new Net(3,6);
     net.call();
   //end
-  }();
+  };
+
+  var calc = function calc(stage) {
+    //フォームデータ入力 -> 配列生成 -> データベース格納 -> ヴィジュアライズ
+    stage.innerHTML = '';
+
+    //form
+    var principal = document.createElement('input');
+        principal.setAttribute('type', 'number');
+        principal.setAttribute('placeholder','元金');
+        principal.setAttribute('step', '10000');
+    var rate = document.createElement('input');
+        rate.setAttribute('type', 'number');
+        rate.setAttribute('placeholder','利率');
+        rate.setAttribute('step', '0.1');
+    var times = document.createElement('input');
+        times.setAttribute('type','number');
+        times.setAttribute('placeholder','回数');
+
+    //button
+    var like = document.createElement('button');
+        like.textContent = 'like';
+    var remove = document.createElement('button');
+        remove.textContent = 'remove';
+    var appearance = document.createElement('select');
+        appearance.setAttribute('name', 'type');
+
+    var options = ['text', 'graph','line'];
+
+    for(var i=0,n=options.length;i<n;i++) {
+      var option = document.createElement('option');
+
+      option.setAttribute('value', options[i]);
+      option.textContent = options[i];
+
+      appearance.appendChild(option);
+    }
+
+    //display
+    var results = document.createElement('div');
+        results.style.overflow = 'visible';
+        results.style.boxShadow = '0 0 1px gray';
+
+    var datas = [];
+
+    //dom
+    stage.appendChild(principal);
+    stage.appendChild(rate);
+    stage.appendChild(times);
+    stage.appendChild(like);
+    stage.appendChild(remove);
+    stage.appendChild(appearance);
+    stage.appendChild(results);
+
+    principal.insertAdjacentHTML('beforebegin', `<span class="calc_tab">${principal.placeholder}<span>`);
+    rate.insertAdjacentHTML('beforebegin', `<br><span class="calc_tab">${rate.placeholder}<span>`);
+    times.insertAdjacentHTML('beforebegin', `<br><span class="calc_tab">${times.placeholder}<span>`);
+    like.insertAdjacentHTML('beforebegin', '<br>');
+
+    principal.addEventListener('change',calc, false);
+    times.addEventListener('change',calc, false);
+    rate.addEventListener('change',calc, false);
+    appearance.addEventListener('change', calc, false);
+
+    //like to insert db
+    like.addEventListener('mousedown', function(e) { save('like', e); }, false);
+
+    //like to remove db
+    remove.addEventListener('mousedown', function(e) { save('remove', e); }, false);
+
+    //modal
+    var like_modal = new Modal({width:300, height: 100, screen: ''}, like, (function() {
+      var html = `<div>${this.name}</div><div>ストレージ名：<input type="text" id="like_name"></div>`;
+      return html;
+    }()));
+    var remove_modal = new Modal({width: 300, height: 100, screen: ''}, remove, '削除'); //fullscreen対応も可能スマホ用
+
+    like_modal.toggle();
+    like_modal.con();
+
+    remove_modal.toggle();
+    remove_modal.con();
+
+    function calc() {
+
+      if(rate.value !== '' && principal.value !== '' && times.value !== '') {
+
+        //initialize
+        datas.length = 0;
+
+        var init = {};
+            init.rate = rate.value;
+            init.times = times.value;
+            init.principal = principal.value * 1;
+            init.appearance = appearance.value;
+
+        //generate array
+        for(var i=0;i<init.times;i++) {
+
+          init.principal = init.principal * (1 + init.rate * 1);
+          datas.push(init.principal);
+
+        }
+
+        init.datas = datas;
+
+        //to localStorage
+        storage('in','DB', init)
+
+        //visualize
+        visualize();
+
+      }
+
+    }
+
+    //localStorage module
+    function storage(type, name, json) {
+
+      if(type === 'in') {
+
+        localStorage.setItem(name, JSON.stringify(json));
+
+      } else if(type === 'out') {
+
+        var data = localStorage.getItem(name);
+            data = JSON.parse(data);
+
+        return data;
+
+      } else if(type === 'remove') {
+
+        localStorage.removeItem(name);
+
+      }
+
+    }
+
+    //favo module
+    function save(type, db_name, e) {
+
+      //気になったデータのみローカルストレージまたはDBに格納する。
+      //if(type === undefined ) console.log(arr, type);
+      if(type === 'like') {  //データ格納
+
+        var data = JSON.parse(localStorage.getItem('DB'));
+
+        storage('in', 'like', data);
+
+      } else if(type === 'remove') { //データ削除
+
+        storage('remove', 'like');
+
+      }
+
+    }
+
+    //visualize module
+    function visualize() {
+
+      var json = storage('out','DB');
+
+      if(json.appearance === 'text') text(json);
+      if(json.appearance === 'graph') bar(json);
+      if(json.appearance === 'line') line(json);
+
+    }
+
+    //text visual
+    function text(json) {
+
+      results.innerHTML = '';
+
+      for(var i=0,n=json.datas.length;i<n;i++) {
+
+        results.insertAdjacentHTML('beforeend', `${i + 1}回利回り：${parseInt(json.datas[i])}<br>`);
+        //results.innerHTML += `${i + 1}回利回り：${arr[i]}<br>`;
+
+      }
+    }
+
+    //d3.js bar chart
+    function bar(json) {
+
+      results.innerHTML = '';
+      results.style.height = results.style.width = '100px';
+
+      var barWidth = 20;
+      var scale = 0.01;
+      var dataHieght = Math.max.apply(null,json.datas) * scale;
+      var dataWidth = json.datas.length * barWidth * 1.2;
+
+      results.style.height = `${dataHieght}px`;
+      results.style.width = `${dataWidth}px`;
+
+      //bar chart
+      var bar = d3.select(results)  // div#result内に出力
+        .append("svg")    // table要素を追加
+        .attr({
+          width: dataWidth,
+          height: dataHieght
+        });
+
+
+        bar.selectAll("rect")    // tr要素を対象にする
+        .data(json.datas) // 出力するデータ
+        .enter()    // データ数だけ要素を生成
+        .append("rect")
+        .attr({
+          x: 0,
+          y: dataHieght
+        })
+        .transition()
+        .attr({
+          x:function(d, i) {
+            return i * barWidth * 1.2;
+          },
+          y: function(d,i) {
+            return dataHieght - d * scale;
+          },
+          width: barWidth,
+          height: function(d,i) {
+            return d * scale;
+          },
+          fill: 'red'
+        });
+
+      //bar chart
+      bar.selectAll('text')
+        .data(json.datas)
+        .enter()
+        .append('text')
+        .text(function(d,i) {
+          return parseInt(d * 0.01);
+        })
+        .attr({
+          x: function(d,i) {
+            return i * barWidth * 1.2;
+          },
+          y: function(d,i) {
+            return dataHieght - d * scale;
+          },
+          'font-size': '5pt'
+
+        })
+    //end
+    }
+    //d3.js chart
+    function line(json) {
+
+      results.innerHTML = '';
+      //results.style.height = results.style.width = '100px';
+
+      var barWidth = 20;
+      var scale = 0.01;
+      var svgHeight = Math.max.apply(null,json.datas) * scale;
+      var svgWidth = json.datas.length * barWidth * 1.2;
+
+      results.style.height = `${svgHeight}px`;
+      results.style.width = `${svgWidth}px`;
+      /*
+      var list = [10, 30, 5, 60, 40, 178, 56, 130, 24, 80];
+      var svgWidth = 320; // SVG領域の横幅
+      var svgHeight = 240;    // SVG領域の縦幅
+      // SVGの表示領域を生成
+      var svg = d3.select(results).append("svg")
+      .attr("width", svgWidth).attr("height", svgHeight)
+      // 折れ線を生成
+      var line = d3.svg.line()
+      .x(function(d, i){ return i * svgWidth/(list.length-1); })  // 横方向はSVG領域に合わせて調整。データは最低2個あるのが前提
+      .y(function(d){ return svgHeight-d; })  // 縦方向は数値そのままでスケール等しない
+      // 折れ線グラフを描画
+      svg.append("path")
+      .attr("d", line(list))  // 線を描画
+      .attr("stroke", "black")    // 線の色を指定
+      .attr("fill", "none");  // 塗り潰しなし。指定しないと黒色で塗り潰される
+    */
+    console.log(svgHeight);
+
+    //bar chart
+      var svg = d3.select(results)  // div#result内に出力
+        .append("svg")    // table要素を追加
+        .attr({
+          width: svgWidth,
+          height: svgHeight
+        });
+
+      // 折れ線を生成
+      var line = d3.svg.line()
+      .x(function(d, i){ return i * svgWidth/(json.datas.length-1); })  // 横方向はSVG領域に合わせて調整。データは最低2個あるのが前提
+      .y(function(d){
+
+        return svgHeight - d * scale;
+      })  // 縦方向は数値そのままでスケール等しない
+      // 折れ線グラフを描画
+      svg.append("path")
+      .attr("d", line(json.datas))  // 線を描画
+      .attr("stroke", "black")    // 線の色を指定
+      .attr("fill", "none");  // 塗り潰しなし。指定しないと黒色で塗り潰される
+    //end
+    }
+  //end
+  };
+
+  var heatmap = function heatmap(stage) {
+
+    var positions = []; //click point data
+
+    //格納したpositionsからgridに落とし込む作業
+
+    var start = document.createElement('button');
+        start.textContent = 'start';
+    var visual = document.createElement('button');
+        visual.textContent = 'visualize';
+    var size = document.createElement('input');
+        size.setAttribute('type', 'text');
+    var test_stage = document.createElement('div');
+
+        stage.appendChild(start);
+        stage.appendChild(visual);
+        stage.appendChild(size);
+        stage.appendChild(test_stage);
+
+        stage.style.height = '500px';
+        test_stage.style.width = `${stage.offsetWidth}px`;
+        test_stage.style.height = `${stage.offsetHeight}px`;
+        test_stage.style.boxShadow = '0 0 1px gray';
+
+    //get click data
+    start.addEventListener('mousedown', collection, false);
+
+    //visualize heatmap
+    visual.addEventListener('mousedown', create_heatmap, false);
+
+    /* -------  grid class ------------ */
+    var Block = function Block(json) { //width height use %
+
+      var grade = ['rgba(0,0,0,0.08)','rgba(0,0,0,0.16)','rgba(0,0,0,0.24)','rgba(0,0,0,0.32)'];
+
+      this.block = document.createElement('div');
+
+      this.block.style.position = 'absolute';
+      this.block.style.left = `${json.x}px`;
+      this.block.style.top = `${json.y}px`;
+      this.block.style.width = `${json.width}px`;
+      this.block.style.height = `${json.height}px`;
+      this.block.style.background = json.background;
+      this.block.textContent = json.no;
+
+      //this.block.style.background = grade[json.position.length];
+      this.block.style.background = `rgba(0,0,0,${ 0.08 * json.position.length })`;
+
+    }
+
+    Block.prototype.set = function set(test_stage) {
+      test_stage.style.position = 'relative';
+      test_stage.appendChild(this.block);
+    };
+
+    Block.prototype.create = function create() {
+
+    };
+
+    /* ----------- collect click data ------------- */
+    function collection() {
+      test_stage.addEventListener('mousemove', get_point, false);
+    }
+
+    function get_point(e) {
+      positions.push(e);
+      console.log(positions);
+    }
+
+    /* ----------- create grid ------------- */
+    function create_heatmap() {
+      create_grid(size.value || 10);
+      test_stage.removeEventListener('mousemove', get_point, false);
+    }
+
+    function create_grid(size) {//分割 size 提供画面 stage
+
+      var grids = []; //grid style data : left top
+      var grid_distance_x = test_stage.offsetWidth / size;
+      var grid_distance_y = test_stage.offsetHeight / size;
+
+      for(var i=0,n=size*size;i<n;i++) {
+        //console.log(i % size, parseInt(i / size));
+
+        //グリッド生成
+        var grid = {};
+            grid.no = i;
+            grid.x = parseInt(grid_distance_x * (i % size));
+            grid.y = grid_distance_y * parseInt(i / size);
+            grid.width = grid_distance_x;
+            grid.height = grid_distance_y;
+            i % 2 ? grid.background = 'rgba(0,0,0,.08)' : grid.background = 'transparent';
+            grid.position = [];
+
+        //グリッド座標格納
+        grids.push(grid);
+
+        if(i === size * size - 1) put_collection(grids, size);
+
+      }
+
+    }
+
+    /* ---------- integrate clickdata on grid ------ */
+    function put_collection(grids) {
+      console.log(positions);
+
+      //add color data
+      for(var i = 0,n = positions.length; i < n; i++) {
+
+        //位置の情報をグリッド配列に追加
+        add_position_data(positions[i], grids);
+
+        //最終回でブロックを生成
+        if(i === n -1) create_blocks(grids);
+
+      }
+
+      //add position data to grids array
+      function add_position_data(position, grids) {
+        //console.log(grids.offsetX, grids.offsetY);
+        //gridsで検証させる <- gridsは有限だがpositionsは無限だから。
+        for(var i = 0,n = grids.length; i < n; i++) {
+          //console.log(grids[i]);
+          var range_x = grids[i].x < position.offsetX && (grids[i].x + grids[i].width) > position.offsetX;
+          var range_y = grids[i].y < position.offsetY && grids[i].y + grids[i].height > position.offsetY ;
+
+          if( range_x && range_y ) {
+
+            var obj = {};
+                obj.x = position.offsetX;
+                obj.y = position.offsetY;
+
+            grids[i].position.push(obj);
+
+          }
+
+        }
+      }
+
+      //add blocks
+      function create_blocks(grids) {
+
+        //var promise = new Promise(function(resolve, reject) {
+
+          /*for(var i = 0,n = grids.length; i < n; i++) {
+
+            if(grids[i].position.length !== 0) {
+              //grids[i].position.length => heatmap storength
+              console.log(grids[i].position.length);
+              girds[i].background = `rgba(0,0,0,${0.08 * grids[i].position.length}`;
+
+            }
+
+            if(i = n - 1) resolve('add finish');
+
+          }*/
+
+        //});
+
+        //promise.then(function(value) {
+          //console.log(value);
+
+          for(var i = 0,n = grids.length; i < n; i++) {
+            if(grids[i].position.length !== 0) console.log(grids[i].position.length, grids[i].background);
+
+              var block = new Block(grids[i]);
+                  block.set(test_stage);
+
+          }
+
+      //  });
+
+      }
+
+    }
+
+  //end
+}(document.getElementById('viewArea'));
 //end
 };
 
 /* -------------- scraping page module ------------ */
 var scraping = function() {
-	id('scrape').addEventListener('click',function() {
+
+	document.getElementById('scrape').addEventListener('click',function() {
 		//console.log('click');
 		var view = $.ajax({
 			url: '/scrape',
 			type: 'GET',
-			data: {'url': id('scrapeURL').value }
+			data: {'url': document.getElementById('scrapeURL').value }
 		});
 
-		view.done(function(data) {
-			//var viewArea = id('viewArea').innerHTML;
-			id('viewHeader').innerHTML = data.header;
-			id('viewArea').innerHTML = data.html;
-			scraping();
-		});
+  	view.done(function(data) {
+  		//var viewArea = id('viewArea').innerHTML;
+  		document.getElementById('viewHeader').innerHTML = data.header;
+  		document.getElementById('viewArea').innerHTML = data.html;
+  		scraping();
+
+  	});
+
 	},false);
 //end
 };
 
 /* -------------- socket test module -------------- */
-var socketIo = function() {
+var socketIo = function socketIo() {
 	var module = {};
 			module.field = document.getElementById('testField');
 
 	/* ================= geo location ================= */
 	module.geolocationModule = function geolocationModule() {
-		var createMapTab = function () {
+
+		var createMapTab = function createMapTab() {
+
 			var geolocation = $.ajax({
 					url: '/socket/geolocation',
 					type: 'GET'
@@ -579,6 +1329,7 @@ var socketIo = function() {
 				module.field.innerHTML = data;
 				createGoogleMap();
 			});
+
 		}();
 
 		var createGoogleMap = function createGoogleMap() {
@@ -606,6 +1357,7 @@ var socketIo = function() {
 
 			//set marker
 			function setMarker(json) {
+
 				for(var i=0,n=json.length;i<n;i++) {
 					var currentPosition = new google.maps.LatLng(json[i].latitude, json[i].longitude);
 					var marker = new google.maps.Marker({ position: currentPosition, visible: true, clickable: true ,draggable: true });
@@ -613,6 +1365,7 @@ var socketIo = function() {
 					markerList.push(marker);
 					marker.setMap(map);
 				}
+
 			}
 			//set contets
 			function setMarkerContents(json) {
@@ -620,12 +1373,14 @@ var socketIo = function() {
 
 				for(var i=0,n=json.length;i<n;i++) {
           var date = new Date(json[i].date);
+
 					//display deta 編集して見た目およくできる。
-					output += '<div class="wrap"><div>No.' + json[i].id + '</div>'
-								+ '<div>' + date.getFullYear() + '.' +date.getMonth() + '.' + date.getDate() +'</div>'
-								+	'<div>緯度' + json[i].latitude.toFixed(2) + '</div>'
-								+	'<div>経度' + json[i].longitude.toFixed(2) + '</div>'
-								+	'<div>' + json[i].comment + '<span id="' + json[i]._id + '" class="removeData"> × </span>' + '</div></div>';
+					output += `<div class="wrap"><div>No.${json[i].id}</div>
+          <div>${date.getFullYear() }.${date.getMonth()}.${date.getDate()}</div>
+          <div>緯度${json[i].latitude.toFixed(2)}</div>
+          <div>経度${json[i].longitude.toFixed(2)}</div>
+          <div>${json[i].comment}<span id="${json[i]._id }" class="removeData"> × </span>
+          </div></div>`;
 				}
 
 				return output;
@@ -661,10 +1416,12 @@ var socketIo = function() {
 
 					},false);
 				}
+
 			};
 
 			//create marker
 			function createNewPoint(data) {
+
 				socket.emit('new marker send', data);
 				socket.on('new marker return', function(data) {
 
@@ -702,9 +1459,8 @@ var socketIo = function() {
 								//console.log(data);
 								module.field.style.boxShadow = '0 0 2px green';
 
-								presentLocation.innerHTML  = '緯度：' + data.latitude + '<br>' +
-																							'経度：' + data.longitude + '<br>' +
-																							'取得時刻：' + data.time; // prependの時に追加 + '<br>' + module.field.innerHTML;
+                presentLocation.innerHTML  = `緯度：data.latitude<br>経度：data.longitude<br>取得時刻：data.time`;
+                // prependの時に追加 + '<br>' + module.field.innerHTML;
 
 							});
 						}
@@ -746,13 +1502,15 @@ var socketIo = function() {
 
 					map.panTo(new google.maps.LatLng(geoData.latitude, geoData.longitude));
 
-					modal.innerHTML = '<div><span>一言コメント：</span><input name="comment" type="text" id="markerComment" value="test">' +
-														'<button id="submitComment">メモ</button></div>';
+					modal.innerHTML = `<div><span>一言コメント：</span><input name="comment" type="text" id="markerComment" value="test">
+                              <button id="submitComment">メモ</button></div>`;
           console.log(modal);
+
 					modal.style.height = '100%';
 					modal.style.webkitTransition = '0.3s ease 0';
 
 					id('submitComment').addEventListener('click', function(e) {
+
 						var data = {};
 						data.geoData = geoData;
 						data.comment = id('markerComment').value;
@@ -761,6 +1519,7 @@ var socketIo = function() {
 
 						modal.style.height = '0px';
 						modal.style.webkitTransition = '0.3s ease 0';
+
 					});
 
 					modal.children[0].addEventListener('click', function(e) {
@@ -912,6 +1671,7 @@ var socketIo = function() {
             option.w = option.h = 200;
 
 				popWindow(button, popup, html, option);
+
 			//pushChat
 			}();
 
@@ -3175,6 +3935,7 @@ var ui = function ui() {
 
   tvui(new Tvui(document.getElementById('TVUI'), '300px','200px',0.15,0.02,'../images/output/0449.jpg','red'));
   tvui(new Tvui(document.getElementById('TVUI2'), '300px','200px',0.15,0.02,'rgb(129, 180, 6)'));
+  //tvui(new Tvui(document.getElementById('TVUI3')));
 
   var scope_ui = function scope_ui(button,w,h) {
 

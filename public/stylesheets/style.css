@@ -162,6 +162,12 @@ header button {
   font-weight: bold;
 }
 
+#sub_page_help {
+  float: right;
+  font-weight: bold;
+
+}
+
 /* ------- geolocation module -------- */
 #googleMap {
   float: left;
@@ -460,4 +466,9 @@ header button {
 #mail_title {
   padding-left: 4px;
   margin-left: 6px;
+}
+
+.calc_tab {
+  background: rgb(196, 196, 196);
+  color: white;
 }
