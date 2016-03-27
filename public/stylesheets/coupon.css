@@ -1,0 +1,26 @@
+#comment {
+  font-size: 0.8rem;
+  color: gray;
+  background: rgb(255, 255, 255);
+  height: 2.4rem;
+  line-height: 2.4rem;
+  text-align: center;
+}
+
+button {
+  border-radius: 0;
+}
+
+#guide {
+  font-size: 0.8rem;
+}
+
+ul {
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  text-decoration: underline;
+  color: gray;
+}

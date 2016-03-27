@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/coupon.css' />
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <button id="keyPair_create">秘密鍵生成とアドレス取得</button>
+    <button id="create_transaction">送金</button>
+    <button id="check_transaction">取引情報確認</button>
+    <div id="result"></div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="/javascripts/jquery.qrcode.min.js"></script>
+    <script src="/javascripts/wallet.js"></script>
+
+  </body>
+</html>

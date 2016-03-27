@@ -101,6 +101,16 @@ var YSchema = new mongoose.Schema({
 	'総資産経常利益率': String
 }, {collection: 'YFinfo'});
 
+var CouponSchema = new mongoose.Schema({
+	'id': Number,
+	'date': { type: Date, default: Date.now}
+},{collection: 'coupon'});
+
+var BitcoinSchema = new mongoose.Schema({
+	'privateKey': String,
+	'address': String
+}, {collection: 'bitcoin'});
+
 exports.Yahoo = db.model('Yahoo', YSchema);
 exports.User = db.model('User', UserSchema);
 exports.Chat = db.model('Chat', SocketSchema);
@@ -111,3 +121,5 @@ exports.Reserve_stock = db.model('Reserve_stock', ReseverSchema2);
 exports.Reserve_data = db.model('Reserve_data', ReseverSchema3);
 exports.Customer_data = db.model('Customer_data', ReseverSchema4);
 exports.Mail_data = db.model('Mail_data', MailSchema);
+exports.Coupon = db.model('Coupon', CouponSchema);
+exports.Bitcoin_keypair = db.model('Bitcoin_keypair', BitcoinSchema);

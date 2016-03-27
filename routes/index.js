@@ -11,10 +11,12 @@ const Reserve_stock = model.Reserve_stock;
 const Reserve_data = model.Reserve_data;
 const Customer_data = model.Customer_data;
 const Mail_data = model.Mail_data;
+const Bitcoin_keypair = model.Bitcoin_keypair;
 
 const noodle = require('noodlejs');
 const cheerio = require("cheerio");
 const request = require('request');
+const bitcoin = require('bitcoinjs-lib');
 
 const validator = require('validator');
 
@@ -29,9 +31,60 @@ const mail = {
 
 const yahoo_finance = require('./yahooscrape');
 
+console.log(bitcoin.TransactionBuilder());
+
 // Root
 router.get('/', (req, res, next) => {
   res.render('index', { title: 'Test App' });
+});
+
+router.get('/wallet', (req, res) => {
+
+  res.render('wallet', { title: 'Fusan wallet' });
+
+});
+
+router.get('/wallet/create', (req, res) => {
+
+  //important !! loacal stoarage best practice.
+  //attention backup caution after generating keyPair.
+
+  //count over 3 account => find => res.send 3accunts_data.
+  //coun under 3 accunt => upadate => res.send untill 3 accunts_data
+
+  Bitcoin_keypair.count({}, (err, count) => {
+
+    count < 4 ? create() : find() ;
+
+  });
+
+  //更新データチェック
+  function create() {
+
+    var keyPair = bitcoin.ECPair.makeRandom();
+
+    var key_address = new Bitcoin_keypair(keyPair);
+    var conditions = { "privateKey": keyPair.toWIF() };
+    var doc = { "privateKey": keyPair.toWIF(), "address": keyPair.getAddress()};
+    var options = { "upsert" : true };
+
+    Bitcoin_keypair.update(conditions, doc, options, (err, data) => {
+
+      find(data);
+
+    });
+
+  }
+
+  //全データ取得
+  function find(json) {
+
+    Bitcoin_keypair.find({}, (err, data) => {
+      res.send(data);
+    });
+
+  }
+
 });
 
 //imap 受信

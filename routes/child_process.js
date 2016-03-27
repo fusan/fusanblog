@@ -1,3 +1,5 @@
+'use strict';
+
 var router = require('express').Router();
 var server = require('http').Server(router);
 
@@ -5,6 +7,16 @@ var events = require('events');
 var fs = require('fs');
 
 const exec = require('child_process').exec;
+
+let person = {
+  name: 'fusan',
+  last: 'fujii',
+  sayname() {
+    return `${this.name} ${this.last}`;
+  }
+}
+
+console.log(person.sayname());
 
 router.get('/', (req, res) => {
 

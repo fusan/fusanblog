@@ -9,14 +9,15 @@ var socket = io.connect('http://localhost:3000');
 //フローを直列で繋いでいくとミスが出にくい
 //フローを分散する
 
-/* sidebar */
-var Slider = function Slider(parent, modal, position) {
+/* sidebar Class */
+var Slider = function Slider(parent, modal, position, contents) {
   var self = this;
 
   this.flag = false;
   this.parent = parent;
   this.modal = modal;
   this.position = position;
+  this.contents = contents;
 
   this.modal.width = this.parent.innerWidth;
   this.modal.height = this.parent.innerHeight;
@@ -35,7 +36,7 @@ Slider.prototype.open = function(e) {
     if(e.pageX < this.modal.width * 0.79 ) this.flag = false;
   }
 
-
+  //left modal
   if(this.position === 'left') {
     if(e.pageX < 10) this.flag = true;
     if(e.pageX > this.modal.width * 0.21 ) this.flag = false;
@@ -53,10 +54,8 @@ Slider.prototype.style = function() {
     if(this.flag) {
       this.modal.style.height = `${this.modal.height}px`;
       this.modal.style.width = `${this.modal.width * 0.2}px`;
-      if(this.position === 'right')
-        this.modal.style.right = 0;
-      if(this.position === 'left')
-        this.modal.style.left = 0;
+      if(this.position === 'right') this.modal.style.right = 0;
+      if(this.position === 'left') this.modal.style.left = 0;
       this.modal.style.top = `${this.modal.height * 0.5}px;`
       this.modal.style.transition = '0.5s ease 0';
       this.modal.style.boxShadow = '0 0 1px black';
@@ -71,6 +70,9 @@ Slider.prototype.column = function(parent) {
 
     if(this.flag) {
 
+      this.modal.innerHTML = this.contents;
+
+      /*
       for(var i=0,n=10;i<n;i++) {
         var list = document.createElement('div');
             list.style.width = '100%';
@@ -81,22 +83,26 @@ Slider.prototype.column = function(parent) {
 
         this.modal.appendChild(list);
       }
+      */
 
     } else {
 
+      this.modal.innerHTML = '';
+      /*
       while (this.modal.firstChild) {
         this.modal.removeChild(this.modal.firstChild);
       }
+      */
 
     }
 
   };
 
-var slider = new Slider(window, document.getElementById('modal'), 'right');
+var slider = new Slider(window, document.getElementById('slider'), 'right', '<h2>fusan</h2>');
     slider.parent.addEventListener('mousemove', function(e) {
       slider.open(e);
       slider.style();
-      //slider.column();
+      slider.column();
     }, false);
 
 /* --------- modal contoroller class ----------------------------*/
@@ -557,10 +563,10 @@ var experiment = function experiment() {
     var buttons = {};
 
       //key button content / value argemnets
-      buttons.mvc = { stage: stage, dbType: 'localStorage', input: document.createElement('input'), output: document.createElement('span')};
-      buttons.snow = stage;
-      buttons.neuron = stage;
-      buttons.nets = stage;
+      //buttons.mvc = { stage: stage, dbType: 'localStorage', input: document.createElement('input'), output: document.createElement('span')};
+      //buttons.snow = stage;
+      //buttons.neuron = stage;
+      //buttons.nets = stage;
       buttons.calc = stage;
 
     for(var key in buttons) { create_button(key); }
@@ -584,10 +590,10 @@ var experiment = function experiment() {
       var page = this.innerText;
       var arg = buttons[this.innerText];
 
-      if( page === 'mvc' ) mvc(arg);
-      if( page === 'snow' ) snow(arg);
-      if( page === 'neuron' ) neuron(arg);
-      if( page === 'nets' ) nets(arg);
+      //if( page === 'mvc' ) mvc(arg);
+      //if( page === 'snow' ) snow(arg);
+      //if( page === 'neuron' ) neuron(arg);
+      //if( page === 'nets' ) nets(arg);
       if( page === 'calc') calc(arg);
 
       //console.log(e.target.parentNode.children,e.target);
@@ -872,10 +878,19 @@ var experiment = function experiment() {
 
     //modal
     var like_modal = new Modal({width:300, height: 100, screen: ''}, like, (function() {
-      var html = `<div>${this.name}</div><div>ストレージ名：<input type="text" id="like_name"></div>`;
+      var html = `<div>${this.name}</div>
+                  <div>ストレージ名：<input type="text" id="like_name"></div>
+                  <div><button>保存</button>`;
       return html;
     }()));
-    var remove_modal = new Modal({width: 300, height: 100, screen: ''}, remove, '削除'); //fullscreen対応も可能スマホ用
+
+    var remove_modal = new Modal({width: 300, height: 100, screen: ''}, remove, (function() {
+      var html = `<div>${this.name}</div>
+                  <div>ストレージ名：<input type="text" id="remove_name"></div>
+                  <div><button>削除</button>`;
+      return html;
+    }()));
+    //fullscreen対応も可能スマホ用
 
     like_modal.toggle();
     like_modal.con();
@@ -1155,28 +1170,33 @@ var experiment = function experiment() {
     }
 
     Block.prototype.set = function set(test_stage) {
+
       test_stage.style.position = 'relative';
       test_stage.appendChild(this.block);
-    };
-
-    Block.prototype.create = function create() {
 
     };
 
     /* ----------- collect click data ------------- */
     function collection() {
+
       test_stage.addEventListener('mousemove', get_point, false);
+
     }
 
     function get_point(e) {
+
       positions.push(e);
+
       console.log(positions);
     }
 
     /* ----------- create grid ------------- */
     function create_heatmap() {
+
       create_grid(size.value || 10);
+
       test_stage.removeEventListener('mousemove', get_point, false);
+
     }
 
     function create_grid(size) {//分割 size 提供画面 stage
@@ -1185,9 +1205,8 @@ var experiment = function experiment() {
       var grid_distance_x = test_stage.offsetWidth / size;
       var grid_distance_y = test_stage.offsetHeight / size;
 
-      for(var i=0,n=size*size;i<n;i++) {
+      for( var i = 0,n = size*size; i < n; i++ ) {
         //console.log(i % size, parseInt(i / size));
-
         //グリッド生成
         var grid = {};
             grid.no = i;
@@ -1201,9 +1220,9 @@ var experiment = function experiment() {
         //グリッド座標格納
         grids.push(grid);
 
-        if(i === size * size - 1) put_collection(grids, size);
-
       }
+
+      if( i === size * size ) put_collection(grids, size);
 
     }
 
@@ -1212,15 +1231,11 @@ var experiment = function experiment() {
       console.log(positions);
 
       //add color data
-      for(var i = 0,n = positions.length; i < n; i++) {
+      //位置の情報をグリッド配列に追加
+      for(var i = 0,n = positions.length; i < n; i++) { add_position_data(positions[i], grids); }
 
-        //位置の情報をグリッド配列に追加
-        add_position_data(positions[i], grids);
-
-        //最終回でブロックを生成
-        if(i === n -1) create_blocks(grids);
-
-      }
+      //最終回でブロックを生成
+      if( i === n ) create_blocks(grids);
 
       //add position data to grids array
       function add_position_data(position, grids) {
@@ -1247,40 +1262,19 @@ var experiment = function experiment() {
       //add blocks
       function create_blocks(grids) {
 
-        //var promise = new Promise(function(resolve, reject) {
+        for(var i = 0,n = grids.length; i < n; i++) {
 
-          /*for(var i = 0,n = grids.length; i < n; i++) {
+          if(grids[i].position.length !== 0) console.log(grids[i].position.length, grids[i].background);
 
-            if(grids[i].position.length !== 0) {
-              //grids[i].position.length => heatmap storength
-              console.log(grids[i].position.length);
-              girds[i].background = `rgba(0,0,0,${0.08 * grids[i].position.length}`;
+          var block = new Block(grids[i]);
 
-            }
+          block.set(test_stage);
 
-            if(i = n - 1) resolve('add finish');
-
-          }*/
-
-        //});
-
-        //promise.then(function(value) {
-          //console.log(value);
-
-          for(var i = 0,n = grids.length; i < n; i++) {
-            if(grids[i].position.length !== 0) console.log(grids[i].position.length, grids[i].background);
-
-              var block = new Block(grids[i]);
-                  block.set(test_stage);
-
-          }
-
-      //  });
+        }
 
       }
 
     }
-
   //end
 }(document.getElementById('viewArea'));
 //end
@@ -1311,6 +1305,7 @@ var scraping = function() {
 
 /* -------------- socket test module -------------- */
 var socketIo = function socketIo() {
+
 	var module = {};
 			module.field = document.getElementById('testField');
 
@@ -1666,7 +1661,7 @@ var socketIo = function socketIo() {
 									+ '<button id="sendMessage">送信</button>';
 
         var option = {};
-            option.type = 'slide';
+            option.type = 'show';
             option.bg = 'rgba(0,0,0,0.08)';
             option.w = option.h = 200;
 
