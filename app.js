@@ -9,7 +9,10 @@ var routes = require('./routes/index');
 var list = require('./routes/list');
 var spa = require('./routes/spa');
 var coupon = require('./routes/coupon');
-//var child_process = require('./routes/child_process');
+var question = require('./routes/question');
+var child_process = require('./routes/child_process');
+var portfolio = require('./routes/portfolio');
+
 
 var app = express();
 
@@ -30,8 +33,9 @@ app.use('/', routes);
 app.use('/list', list);
 app.use('/spa', spa);
 app.use('/coupon', coupon);
-//app.use('/child_process', child_process);
-
+app.use('/question', question);
+app.use('/child_process', child_process);
+app.use('/portfolio', portfolio);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {

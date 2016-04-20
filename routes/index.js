@@ -31,8 +31,6 @@ const mail = {
 
 const yahoo_finance = require('./yahooscrape');
 
-console.log(bitcoin.TransactionBuilder());
-
 // Root
 router.get('/', (req, res, next) => {
   res.render('index', { title: 'Test App' });

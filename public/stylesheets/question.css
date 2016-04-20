@@ -1,0 +1,50 @@
+.unit {
+  margin: 0;
+  padding: 0;
+  height: 200px;
+  width:  200px;
+  box-shadow: 0 0 1px rgb(74, 71, 82) inset;
+  background: rgba(74, 71, 82,0.2);
+}
+
+.text {
+  margin: 5% auto;
+  width: 80%;
+  height: 40%;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.agree {
+  margin: 0 auto 5% auto;
+  width: 80%;
+  height: 10%;
+  background: rgba(208, 201, 42, 0.4);
+}
+
+.disagree {
+  margin: 0 auto 5% auto;
+  width: 80%;
+  height: 10%;
+  background: rgba(41, 149, 9, 0.4);
+}
+
+.prev {
+  text-align: center;
+  width: 100%;
+  height: 10%;
+}
+
+.next {
+  text-align: center;
+  width: 100%;
+  height: 10%;
+}
+
+#questions {
+  margin: 0;
+  padding: 0;
+  height: 200px;
+  width: 200px;
+  overflow: scroll;
+  box-shadow: 0 0 1px rgb(74, 71, 82) inset;
+}
